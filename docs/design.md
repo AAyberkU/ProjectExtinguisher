@@ -35,12 +35,19 @@
 ## 4. Technical Specifications (Initial)
 
 - Pathfinding Algorithm: A* (A-Star) or Dijkstra optimized for hexagonal grids.
-- Grid Logic: Flat-top or Pointy-top hex coordinates (to be decided during implementation).
+- Grid Logic: Flat-top axial hex coordinates (`q`, `r`) are now the working prototype standard.
 - State Management:
   - Pre-Game: Level setup, moves initialized.
   - Planning: Player activating tiles.
   - Execution: Larry moving after "Start" is pressed.
   - Resolution: Success (Reached Destination) or Failure (Fell/No Path).
+
+## 5. Current Prototype Decisions
+
+- Current gameplay scene uses a large regular hex board with 5 cells per outer side (61 total cells).
+- Scene authoring currently relies on prefab-based `HexCell` instances registered under a central `HexGridManager`.
+- Planning-phase interaction is active: players can click walkable inactive tiles to activate them and consume moves, and can reset the planning state.
+- Start and goal are placed on opposite outer edges of the prototype board to support future pathfinding and execution testing.
 
 <environment_details>
 Current time: 2026-04-10T20:36:40+03:00
