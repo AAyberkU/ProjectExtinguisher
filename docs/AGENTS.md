@@ -33,6 +33,8 @@ You may operate as the primary orchestrator or delegate tasks to specific sub-ag
 - Small Steps: Progress in incremental, functional steps rather than massive architectural shifts.
 - User-Centric: When in doubt, or if a decision conflicts with existing manual scene setups, ask the user.
 - Inspector-Driven: Prefer Unity Inspector-friendly solutions (serialized fields, prefabs) over hardcoded references.
+- Tunable Scripts: Expose gameplay-feel and mechanic-related values in the Inspector so they can be adjusted quickly without code edits.
+- Debug Logging: Add practical debug logs to scripts by default, and provide an Inspector toggle on each script to enable or disable logging.
 - Operational Memory: Every session must begin by summarizing the status found in `progress.md`.
 - Commit Messages: Use concise English commit titles and bodies that explain the related change.
 
