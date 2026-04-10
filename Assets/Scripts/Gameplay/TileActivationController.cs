@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using ProjectExtinguisher.Gameplay.Hex;
 using ProjectExtinguisher.Gameplay.Larry;
+using ProjectExtinguisher.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
@@ -26,6 +27,7 @@ namespace ProjectExtinguisher.Gameplay
         [SerializeField] private HexGridManager gridManager;
         [SerializeField] private LarryController larryController;
         [SerializeField] private Camera targetCamera;
+        [SerializeField] private GameHUD gameHUD;
 
         [Header("State")]
         [SerializeField] private GameState currentGameState = GameState.Planning;
@@ -200,6 +202,11 @@ namespace ProjectExtinguisher.Gameplay
                 larryController.ResetToInitialState();
             }
 
+            if (gameHUD != null)
+            {
+                gameHUD.ResetHUD();
+            }
+
             Log($"Planning state reset. Remaining moves restored to {planningMovesRemaining}. Larry: {DescribeCell(GetLarryCurrentCell())}.");
         }
 
@@ -368,6 +375,11 @@ namespace ProjectExtinguisher.Gameplay
             if (targetCamera == null)
             {
                 targetCamera = Camera.main;
+            }
+
+            if (gameHUD == null)
+            {
+                gameHUD = FindFirstObjectByType<GameHUD>();
             }
         }
 

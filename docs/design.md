@@ -50,6 +50,32 @@
 - Start and goal are placed on opposite outer edges of the prototype board to support movement and puzzle-flow testing.
 - The current prototype already treats goal reach as a win and zero remaining moves as a fail state.
 
+## 6. HUD Design
+
+### Layout
+
+- **Top-left**: `Moves Left: 08` — large counter, color shifts as moves deplete (normal → amber → red).
+- **Top-center**: `Level 1` — small label, placeholder until level system is built.
+- **Top-right**: `R Reset` — small always-visible hint during play.
+- **Center overlay**: Win/Lose message — hidden during play, fades/slides in on outcome.
+- **Bottom-center**: Single-line gameplay hint — fades out after a few seconds.
+
+### Elements
+
+| Element | Position | Behavior |
+|---|---|---|
+| Moves Left counter | Top-left | Large text; color shifts: normal → amber (≤50%) → red (≤25%) |
+| Level label | Top-center | Small text; shows current level name/number (e.g. `Level 1`) |
+| Reset hint | Top-right | Small `R  Reset` label; always visible during play |
+| Win/Lose overlay | Center | Hidden during play; shows `You Win` or `Out of Moves` + sub-line `Press R to reset`; fades/slides in on outcome |
+| Gameplay hint | Bottom-center | Single-line helper text; fades out after a configurable number of seconds |
+
+### Style
+
+- Minimal and semi-transparent so the board remains the primary focus.
+- Hex-corner motif on panels where possible.
+- Canvas render mode: Screen Space – Overlay; `GraphicRaycaster` disabled so HUD does not intercept gameplay clicks.
+
 <environment_details>
-Current time: 2026-04-11T01:54:42+03:00
+Current time: 2026-04-11T02:04:36+03:00
 </environment_details>
