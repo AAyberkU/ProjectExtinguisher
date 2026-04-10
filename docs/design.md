@@ -1,8 +1,8 @@
 ## 1. Project Overview
 
-- Genre: Hex-based Pathfinding Puzzle
+- Genre: Hex-based Puzzle
 - Perspective: 2D Top-down with an Isometric visual style.
-- Core Loop: Analyze level -> Activate strategic hex tiles -> Press "Start" -> Larry moves to destination.
+- Core Loop: Analyze level -> Activate a neighboring hex tile -> Larry advances one step -> Reach the destination.
 
 ## 2. Visual Style & World
 
@@ -21,35 +21,33 @@
 - Clicking a tile consumes 1 Move from the "Move Limit."
 - Activated tiles become "walkable" surfaces for Larry.
 
-### 3.2 Movement & Pathfinding
+### 3.2 Movement
 
-- The "Start" Button: Larry remains stationary until the player triggers the movement phase.
-- Efficient Pathing: If multiple paths exist to the destination, Larry will automatically calculate and take the most efficient (shortest) route.
-- Falling Mechanic: If Larry reaches an edge or a gap where no active tiles lead to the destination, he falls, resulting in a Level Failure.
+- Immediate Movement: Larry does not wait for a separate execution phase. Each valid tile activation immediately advances Larry by one step.
+- Neighbor-Driven Progression: Players may only activate tiles that are adjacent to Larry's current position.
+- Goal Completion: The level is completed when Larry reaches the goal tile.
 
 ### 3.3 Constraints
 
 - Move Limit: Each level provides a specific number of activations. If the player runs out of moves before a valid path is created, they must rethink their strategy.
-- Reset: Failure (falling) or running out of moves requires the player to restart the level.
+- Reset: Running out of moves requires the player to restart the level.
 
 ## 4. Technical Specifications (Initial)
 
-- Pathfinding Algorithm: A* (A-Star) or Dijkstra optimized for hexagonal grids.
 - Grid Logic: Flat-top axial hex coordinates (`q`, `r`) are now the working prototype standard.
 - State Management:
   - Pre-Game: Level setup, moves initialized.
-  - Planning: Player activating tiles.
-  - Execution: Larry moving after "Start" is pressed.
-  - Resolution: Success (Reached Destination) or Failure (Fell/No Path).
+  - Active Play: Player activates neighboring tiles while Larry advances step by step.
+  - Resolution: Success (Reached Destination) or restart after running out of moves.
 
 ## 5. Current Prototype Decisions
 
 - Current gameplay scene uses a large regular hex board with 5 cells per outer side (61 total cells).
 - Scene authoring currently relies on prefab-based `HexCell` instances registered under a central `HexGridManager`.
-- Planning-phase interaction is active: players can click walkable inactive tiles to activate them and consume moves, and can reset the planning state.
-- Planning-phase activation is chain-based in the current prototype: the first valid click must be adjacent to the active start tile, and each next valid click must be adjacent to the most recently activated tile.
-- Start and goal are placed on opposite outer edges of the prototype board to support future pathfinding and execution testing.
+- The current direction is step-based play rather than separate planning and execution phases.
+- Each valid click is intended to activate one neighboring tile, consume one move, and immediately move Larry forward by one step.
+- Start and goal are placed on opposite outer edges of the prototype board to support movement and puzzle-flow testing.
 
 <environment_details>
-Current time: 2026-04-10T20:36:40+03:00
+Current time: 2026-04-11T01:20:14+03:00
 </environment_details>

@@ -14,25 +14,26 @@
 - Created reusable prefabs for start, goal, path, support, and blocked hex cells.
 - Expanded the scene to a full 61-cell large hex map with 5 cells per outer side.
 - Corrected the large-board spacing to avoid overlap and fit the board inside the camera view.
-- Restricted planning activation to a frontier chain so players can only extend from the current connected path.
+- Reworked activation to be Larry-centered so only tiles adjacent to Larry can be opened.
+- Added a basic Larry pawn to `GameplayScene` with current-cell tracking and reset support.
+- Added hop-based movement polish to Larry so each step animates with a readable pawn-like bounce.
 
 ## Architecture Snapshot
 
-- Current gameplay code centers on `HexCell`, `HexGridManager`, `GameState`, and `TileActivationController`.
-- `GameplayScene` contains a `GridRoot`, a registered 61-cell flat-top hex board, and a basic planning-phase interaction loop.
+- Current gameplay code centers on `HexCell`, `HexGridManager`, `GameState`, `TileActivationController`, and `LarryController`.
+- `GameplayScene` contains a `GridRoot`, a registered 61-cell flat-top hex board, a Larry pawn, and an active step-by-step interaction loop.
 - All scene tiles are prefab instances under `GridRoot/Cells` and are driven by `HexCell` state plus `HexGridManager` registration.
 - Start is placed at `(-4, 0)`, goal at `(4, 0)`, and blocked sample cells at `(-1, 1)`, `(0, 1)`, `(1, 0)`, `(0, -1)`.
-- Planning activation now uses a frontier rule: the first move must touch the active start cell, and each later move must touch the most recently activated cell.
-- Pathfinding, movement execution, and final win/fail resolution are still not implemented.
+- Larry is now the live reference point for interaction: each valid click activates a neighboring tile, consumes one move, and immediately moves Larry one step.
+- Pathfinding is no longer part of the planned core loop; success/fail resolution and UI feedback are still pending.
 
 ## Immediate Next Steps
 
-1. Manually validate the 61-cell gameplay board and planning interaction in Unity.
-2. Expand frontier validation into full path/topology helpers on top of the current axial indexing.
-3. Add pathfinding and execution-phase movement from start to goal.
-4. Add success/failure resolution and level restart flow.
+1. Add explicit win and out-of-moves fail resolution to the new Larry-centered loop.
+2. Add basic UI feedback for moves remaining and current outcome.
+3. Decide whether to keep adjacency helper logic in `TileActivationController` or centralize it once a second consumer appears.
+4. Continue polishing Larry presentation and game feel after resolution/UI are stable.
 
 ## Notes
 
-- Pathfinding, movement execution, and full planning/execution loop are still pending.
-- Current priority is stabilizing the board prototype before movement and puzzle resolution logic.
+- The game loop is now immediate and Larry-driven; the next priority is closing the prototype loop with resolution and feedback.

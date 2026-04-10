@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using ProjectExtinguisher.Gameplay.Hex;
+using ProjectExtinguisher.Gameplay.Larry;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 namespace ProjectExtinguisher.Gameplay
 {
@@ -22,13 +24,15 @@ namespace ProjectExtinguisher.Gameplay
 
         [Header("References")]
         [SerializeField] private HexGridManager gridManager;
+        [SerializeField] private LarryController larryController;
         [SerializeField] private Camera targetCamera;
 
         [Header("State")]
         [SerializeField] private GameState currentGameState = GameState.Planning;
         [SerializeField] private int planningMoveLimit = 3;
         [SerializeField] private int planningMovesRemaining = 3;
-        [SerializeField] private bool requireFrontierAdjacency = true;
+        [FormerlySerializedAs("requireFrontierAdjacency")]
+        [SerializeField] private bool requireLarryAdjacency = true;
 
         [Header("Input")]
         [SerializeField] private bool allowMouseActivation = true;
@@ -46,8 +50,6 @@ namespace ProjectExtinguisher.Gameplay
 
         private readonly List<CellPlanningSnapshot> initialSnapshots = new();
         private bool hasCapturedInitialState;
-        private HexCell initialFrontierCell;
-        private HexCell currentFrontierCell;
 
         public GameState CurrentGameState => currentGameState;
         public int PlanningMoveLimit => planningMoveLimit;
@@ -134,8 +136,16 @@ namespace ProjectExtinguisher.Gameplay
 
             hasCapturedInitialState = initialSnapshots.Count > 0;
             planningMovesRemaining = planningMoveLimit;
-            initialFrontierCell = ResolveInitialFrontierCell();
-            currentFrontierCell = initialFrontierCell;
+
+            if (larryController != null)
+            {
+                larryController.CaptureInitialState();
+            }
+            else
+            {
+                LogWarning("Captured board state without a LarryController reference.");
+            }
+
             Log($"Captured planning snapshot for {initialSnapshots.Count} cells.");
         }
 
@@ -171,14 +181,18 @@ namespace ProjectExtinguisher.Gameplay
 
             planningMovesRemaining = planningMoveLimit;
             currentGameState = GameState.Planning;
-            currentFrontierCell = initialFrontierCell;
 
             if (gridManager != null)
             {
                 gridManager.RebuildRegistry();
             }
 
-            Log($"Planning state reset. Remaining moves restored to {planningMovesRemaining}. Frontier: {DescribeCell(currentFrontierCell)}.");
+            if (larryController != null)
+            {
+                larryController.ResetToInitialState();
+            }
+
+            Log($"Planning state reset. Remaining moves restored to {planningMovesRemaining}. Larry: {DescribeCell(GetLarryCurrentCell())}.");
         }
 
         private void HandleResetInput()
@@ -260,16 +274,40 @@ namespace ProjectExtinguisher.Gameplay
                 return;
             }
 
-            if (requireFrontierAdjacency && !IsAdjacentToFrontier(cell))
+            HexCell larryCell = GetLarryCurrentCell();
+            if (larryCell == null)
             {
-                Log($"Ignored non-adjacent cell '{cell.name}' at {cell.GridIndex}. Current frontier: {DescribeCell(currentFrontierCell)}.");
+                LogWarning("Activation skipped because Larry does not currently occupy a registered cell.");
+                return;
+            }
+
+            if (requireLarryAdjacency && !IsAdjacentToCell(larryCell, cell))
+            {
+                Log($"Ignored non-adjacent cell '{cell.name}' at {cell.GridIndex}. Larry is at {DescribeCell(larryCell)}.");
+                return;
+            }
+
+            if (larryController != null && larryController.IsMoving)
+            {
+                Log($"Ignored click on '{cell.name}' at {cell.GridIndex} because Larry is already mid-hop.");
+                return;
+            }
+
+            if (larryController != null && !larryController.MoveToCell(cell))
+            {
+                LogWarning($"Larry could not move onto '{cell.name}' at {cell.GridIndex}.");
                 return;
             }
 
             cell.SetActive(true);
             planningMovesRemaining--;
-            currentFrontierCell = cell;
-            Log($"Activated '{cell.name}' at {cell.GridIndex}. Remaining moves: {planningMovesRemaining}. Frontier moved to {DescribeCell(currentFrontierCell)}.");
+
+            Log($"Activated '{cell.name}' at {cell.GridIndex}. Remaining moves: {planningMovesRemaining}. Larry moved to {DescribeCell(GetLarryCurrentCell())}.");
+
+            if (cell.IsGoal)
+            {
+                Log($"Larry reached the goal at {DescribeCell(cell)}.");
+            }
         }
 
         private void CacheReferences()
@@ -277,6 +315,11 @@ namespace ProjectExtinguisher.Gameplay
             if (gridManager == null)
             {
                 gridManager = GetComponent<HexGridManager>();
+            }
+
+            if (larryController == null)
+            {
+                larryController = GetComponentInChildren<LarryController>(true);
             }
 
             if (targetCamera == null)
@@ -300,50 +343,24 @@ namespace ProjectExtinguisher.Gameplay
             return registeredCell == cell;
         }
 
-        private HexCell ResolveInitialFrontierCell()
+        private HexCell GetLarryCurrentCell()
         {
-            if (gridManager == null)
-            {
-                return null;
-            }
-
-            HexCell startCell = gridManager.GetStartCell();
-            if (startCell != null && startCell.IsActive)
-            {
-                return startCell;
-            }
-
-            IReadOnlyList<HexCell> cells = gridManager.GetAllCells();
-            for (int index = 0; index < cells.Count; index++)
-            {
-                HexCell cell = cells[index];
-                if (cell != null && cell.IsActive)
-                {
-                    return cell;
-                }
-            }
-
-            return null;
+            return larryController == null ? null : larryController.CurrentCell;
         }
 
-        private bool IsAdjacentToFrontier(HexCell candidate)
+        private bool IsAdjacentToCell(HexCell origin, HexCell candidate)
         {
-            if (candidate == null)
+            if (origin == null || candidate == null)
             {
                 return false;
             }
 
-            if (currentFrontierCell == null)
-            {
-                return false;
-            }
-
-            Vector2Int frontierIndex = currentFrontierCell.GridIndex;
+            Vector2Int originIndex = origin.GridIndex;
             Vector2Int candidateIndex = candidate.GridIndex;
 
             for (int index = 0; index < AxialNeighborDirections.Length; index++)
             {
-                if (frontierIndex + AxialNeighborDirections[index] == candidateIndex)
+                if (originIndex + AxialNeighborDirections[index] == candidateIndex)
                 {
                     return true;
                 }
