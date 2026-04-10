@@ -17,6 +17,8 @@
 - Reworked activation to be Larry-centered so only tiles adjacent to Larry can be opened.
 - Added a basic Larry pawn to `GameplayScene` with current-cell tracking and reset support.
 - Added hop-based movement polish to Larry so each step animates with a readable pawn-like bounce.
+- Added win condition when Larry reaches the goal tile.
+- Added out-of-moves fail condition when the last valid move is spent without reaching the goal.
 
 ## Architecture Snapshot
 
@@ -25,15 +27,16 @@
 - All scene tiles are prefab instances under `GridRoot/Cells` and are driven by `HexCell` state plus `HexGridManager` registration.
 - Start is placed at `(-4, 0)`, goal at `(4, 0)`, and blocked sample cells at `(-1, 1)`, `(0, 1)`, `(1, 0)`, `(0, -1)`.
 - Larry is now the live reference point for interaction: each valid click activates a neighboring tile, consumes one move, and immediately moves Larry one step.
-- Pathfinding is no longer part of the planned core loop; success/fail resolution and UI feedback are still pending.
+- `TileActivationController` now owns minimal resolution flags for win/fail, locks input after an outcome, and resets back to a playable state with `R`.
+- Pathfinding is no longer part of the planned core loop; UI feedback is the main remaining missing layer.
 
 ## Immediate Next Steps
 
-1. Add explicit win and out-of-moves fail resolution to the new Larry-centered loop.
-2. Add basic UI feedback for moves remaining and current outcome.
+1. Add basic UI feedback for moves remaining and current outcome.
+2. Expose win/fail feedback clearly in the scene beyond debug logs and inspector state.
 3. Decide whether to keep adjacency helper logic in `TileActivationController` or centralize it once a second consumer appears.
 4. Continue polishing Larry presentation and game feel after resolution/UI are stable.
 
 ## Notes
 
-- The game loop is now immediate and Larry-driven; the next priority is closing the prototype loop with resolution and feedback.
+- The game loop now has playable success and fail resolution; the next priority is visible player feedback.

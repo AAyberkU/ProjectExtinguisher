@@ -31,6 +31,7 @@
 
 - Move Limit: Each level provides a specific number of activations. If the player runs out of moves before a valid path is created, they must rethink their strategy.
 - Reset: Running out of moves requires the player to restart the level.
+- Current Fail Rule: If the final available move is spent without reaching the goal, the run is lost and must be reset.
 
 ## 4. Technical Specifications (Initial)
 
@@ -47,7 +48,8 @@
 - The current direction is step-based play rather than separate planning and execution phases.
 - Each valid click is intended to activate one neighboring tile, consume one move, and immediately move Larry forward by one step.
 - Start and goal are placed on opposite outer edges of the prototype board to support movement and puzzle-flow testing.
+- The current prototype already treats goal reach as a win and zero remaining moves as a fail state.
 
 <environment_details>
-Current time: 2026-04-11T01:20:14+03:00
+Current time: 2026-04-11T01:54:42+03:00
 </environment_details>

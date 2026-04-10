@@ -31,6 +31,8 @@ namespace ProjectExtinguisher.Gameplay
         [SerializeField] private GameState currentGameState = GameState.Planning;
         [SerializeField] private int planningMoveLimit = 3;
         [SerializeField] private int planningMovesRemaining = 3;
+        [SerializeField] private bool hasWon;
+        [SerializeField] private bool hasLost;
         [FormerlySerializedAs("requireFrontierAdjacency")]
         [SerializeField] private bool requireLarryAdjacency = true;
 
@@ -52,6 +54,8 @@ namespace ProjectExtinguisher.Gameplay
         private bool hasCapturedInitialState;
 
         public GameState CurrentGameState => currentGameState;
+        public bool HasWon => hasWon;
+        public bool HasLost => hasLost;
         public int PlanningMoveLimit => planningMoveLimit;
         public int PlanningMovesRemaining => planningMovesRemaining;
 
@@ -136,6 +140,8 @@ namespace ProjectExtinguisher.Gameplay
 
             hasCapturedInitialState = initialSnapshots.Count > 0;
             planningMovesRemaining = planningMoveLimit;
+            hasWon = false;
+            hasLost = false;
 
             if (larryController != null)
             {
@@ -180,7 +186,9 @@ namespace ProjectExtinguisher.Gameplay
             }
 
             planningMovesRemaining = planningMoveLimit;
-            currentGameState = GameState.Planning;
+            hasWon = false;
+            hasLost = false;
+            SetGameState(GameState.Planning);
 
             if (gridManager != null)
             {
@@ -213,7 +221,12 @@ namespace ProjectExtinguisher.Gameplay
 
         private void HandlePlanningClick()
         {
-            if (!allowMouseActivation || currentGameState != GameState.Planning)
+            if (!allowMouseActivation)
+            {
+                return;
+            }
+
+            if (hasWon || hasLost || currentGameState != GameState.Planning)
             {
                 return;
             }
@@ -306,8 +319,38 @@ namespace ProjectExtinguisher.Gameplay
 
             if (cell.IsGoal)
             {
-                Log($"Larry reached the goal at {DescribeCell(cell)}.");
+                EnterWinState(cell);
+                return;
             }
+
+            if (planningMovesRemaining == 0)
+            {
+                EnterFailState(cell);
+            }
+        }
+
+        private void EnterWinState(HexCell goalCell)
+        {
+            if (hasWon)
+            {
+                return;
+            }
+
+            hasWon = true;
+            SetGameState(GameState.Resolution);
+            Log($"Larry reached the goal at {DescribeCell(goalCell)}. Win state entered. Tile activation input is now locked until reset.");
+        }
+
+        private void EnterFailState(HexCell finalCell)
+        {
+            if (hasWon || hasLost)
+            {
+                return;
+            }
+
+            hasLost = true;
+            SetGameState(GameState.Resolution);
+            Log($"Larry ran out of moves after activating {DescribeCell(finalCell)}. Fail state entered. Tile activation input is now locked until reset.");
         }
 
         private void CacheReferences()
