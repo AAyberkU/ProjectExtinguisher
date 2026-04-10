@@ -28,13 +28,26 @@ namespace ProjectExtinguisher.Gameplay
         [SerializeField] private GameState currentGameState = GameState.Planning;
         [SerializeField] private int planningMoveLimit = 3;
         [SerializeField] private int planningMovesRemaining = 3;
+        [SerializeField] private bool requireFrontierAdjacency = true;
 
         [Header("Input")]
         [SerializeField] private bool allowMouseActivation = true;
         [SerializeField] private bool allowKeyboardReset = true;
 
+        private static readonly Vector2Int[] AxialNeighborDirections =
+        {
+            new(1, 0),
+            new(1, -1),
+            new(0, -1),
+            new(-1, 0),
+            new(-1, 1),
+            new(0, 1)
+        };
+
         private readonly List<CellPlanningSnapshot> initialSnapshots = new();
         private bool hasCapturedInitialState;
+        private HexCell initialFrontierCell;
+        private HexCell currentFrontierCell;
 
         public GameState CurrentGameState => currentGameState;
         public int PlanningMoveLimit => planningMoveLimit;
@@ -121,6 +134,8 @@ namespace ProjectExtinguisher.Gameplay
 
             hasCapturedInitialState = initialSnapshots.Count > 0;
             planningMovesRemaining = planningMoveLimit;
+            initialFrontierCell = ResolveInitialFrontierCell();
+            currentFrontierCell = initialFrontierCell;
             Log($"Captured planning snapshot for {initialSnapshots.Count} cells.");
         }
 
@@ -156,13 +171,14 @@ namespace ProjectExtinguisher.Gameplay
 
             planningMovesRemaining = planningMoveLimit;
             currentGameState = GameState.Planning;
+            currentFrontierCell = initialFrontierCell;
 
             if (gridManager != null)
             {
                 gridManager.RebuildRegistry();
             }
 
-            Log($"Planning state reset. Remaining moves restored to {planningMovesRemaining}.");
+            Log($"Planning state reset. Remaining moves restored to {planningMovesRemaining}. Frontier: {DescribeCell(currentFrontierCell)}.");
         }
 
         private void HandleResetInput()
@@ -244,9 +260,16 @@ namespace ProjectExtinguisher.Gameplay
                 return;
             }
 
+            if (requireFrontierAdjacency && !IsAdjacentToFrontier(cell))
+            {
+                Log($"Ignored non-adjacent cell '{cell.name}' at {cell.GridIndex}. Current frontier: {DescribeCell(currentFrontierCell)}.");
+                return;
+            }
+
             cell.SetActive(true);
             planningMovesRemaining--;
-            Log($"Activated '{cell.name}' at {cell.GridIndex}. Remaining moves: {planningMovesRemaining}.");
+            currentFrontierCell = cell;
+            Log($"Activated '{cell.name}' at {cell.GridIndex}. Remaining moves: {planningMovesRemaining}. Frontier moved to {DescribeCell(currentFrontierCell)}.");
         }
 
         private void CacheReferences()
@@ -275,6 +298,63 @@ namespace ProjectExtinguisher.Gameplay
             }
 
             return registeredCell == cell;
+        }
+
+        private HexCell ResolveInitialFrontierCell()
+        {
+            if (gridManager == null)
+            {
+                return null;
+            }
+
+            HexCell startCell = gridManager.GetStartCell();
+            if (startCell != null && startCell.IsActive)
+            {
+                return startCell;
+            }
+
+            IReadOnlyList<HexCell> cells = gridManager.GetAllCells();
+            for (int index = 0; index < cells.Count; index++)
+            {
+                HexCell cell = cells[index];
+                if (cell != null && cell.IsActive)
+                {
+                    return cell;
+                }
+            }
+
+            return null;
+        }
+
+        private bool IsAdjacentToFrontier(HexCell candidate)
+        {
+            if (candidate == null)
+            {
+                return false;
+            }
+
+            if (currentFrontierCell == null)
+            {
+                return false;
+            }
+
+            Vector2Int frontierIndex = currentFrontierCell.GridIndex;
+            Vector2Int candidateIndex = candidate.GridIndex;
+
+            for (int index = 0; index < AxialNeighborDirections.Length; index++)
+            {
+                if (frontierIndex + AxialNeighborDirections[index] == candidateIndex)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private string DescribeCell(HexCell cell)
+        {
+            return cell == null ? "none" : $"'{cell.name}' at {cell.GridIndex}";
         }
 
         private void SyncPlanningMovesForEditor()

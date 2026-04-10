@@ -47,6 +47,7 @@
 - Current gameplay scene uses a large regular hex board with 5 cells per outer side (61 total cells).
 - Scene authoring currently relies on prefab-based `HexCell` instances registered under a central `HexGridManager`.
 - Planning-phase interaction is active: players can click walkable inactive tiles to activate them and consume moves, and can reset the planning state.
+- Planning-phase activation is chain-based in the current prototype: the first valid click must be adjacent to the active start tile, and each next valid click must be adjacent to the most recently activated tile.
 - Start and goal are placed on opposite outer edges of the prototype board to support future pathfinding and execution testing.
 
 <environment_details>
