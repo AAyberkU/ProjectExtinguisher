@@ -32,6 +32,11 @@ namespace ProjectExtinguisher.Gameplay.Hex
         [SerializeField] private CatapultDirection catapultDirection;
         [SerializeField] [Min(1)] private int catapultLaunchDistance = 2;
 
+        [Header("Move Bonus")]
+        [SerializeField] private bool isMoveBonus;
+        [SerializeField] [Min(1)] private int moveBonusAmount = 1;
+        [SerializeField] private bool moveBonusConsumed;
+
         [Header("Visual References")]
         [SerializeField] private SpriteRenderer spriteRenderer;
         [SerializeField] private Collider2D cellCollider;
@@ -53,6 +58,10 @@ namespace ProjectExtinguisher.Gameplay.Hex
         public bool IsCatapult => isCatapult;
         public CatapultDirection LaunchDirection => catapultDirection;
         public int CatapultLaunchDistance => Mathf.Max(1, catapultLaunchDistance);
+        public bool IsMoveBonus => isMoveBonus;
+        public int MoveBonusAmount => Mathf.Max(1, moveBonusAmount);
+        public bool IsMoveBonusConsumed => moveBonusConsumed;
+        public bool HasAvailableMoveBonus => isMoveBonus && !moveBonusConsumed;
         public SpriteRenderer SpriteRenderer => spriteRenderer;
         public Collider2D CellCollider => cellCollider;
         public Sprite CurrentSprite => spriteRenderer == null ? null : spriteRenderer.sprite;
@@ -215,6 +224,59 @@ namespace ProjectExtinguisher.Gameplay.Hex
             Log($"Catapult state changed to enabled={isCatapult}, direction={catapultDirection}, launchDistance={catapultLaunchDistance} for {gridIndex}.");
         }
 
+        public void ConfigureMoveBonus(bool value, int bonusAmount = 1, bool consumed = false)
+        {
+            int clampedBonusAmount = Mathf.Max(1, bonusAmount);
+            bool changed = isMoveBonus != value
+                || moveBonusAmount != clampedBonusAmount
+                || moveBonusConsumed != consumed;
+
+            if (!changed)
+            {
+                return;
+            }
+
+            isMoveBonus = value;
+            moveBonusAmount = clampedBonusAmount;
+            moveBonusConsumed = value && consumed;
+
+            RefreshVisuals();
+            Log($"Move bonus state changed to enabled={isMoveBonus}, amount={MoveBonusAmount}, consumed={moveBonusConsumed} for {gridIndex}.");
+        }
+
+        public bool TryConsumeMoveBonus(out int bonusAmount)
+        {
+            if (!HasAvailableMoveBonus)
+            {
+                bonusAmount = 0;
+                return false;
+            }
+
+            moveBonusConsumed = true;
+            bonusAmount = MoveBonusAmount;
+            RefreshVisuals();
+            Log($"Move bonus consumed for {gridIndex}. Granted {bonusAmount} move(s).");
+            return true;
+        }
+
+        public void SetMoveBonusConsumed(bool value)
+        {
+            bool nextValue = isMoveBonus && value;
+            if (moveBonusConsumed == nextValue)
+            {
+                return;
+            }
+
+            moveBonusConsumed = nextValue;
+            RefreshVisuals();
+            Log($"Move bonus consumed state changed to {moveBonusConsumed} for {gridIndex}.");
+        }
+
+        public void ResetMoveBonus()
+        {
+            SetMoveBonusConsumed(false);
+        }
+
         public Vector2Int GetCatapultOffset()
         {
             return GetAxialOffset(catapultDirection);
@@ -268,6 +330,11 @@ namespace ProjectExtinguisher.Gameplay.Hex
                 return highlightColor;
             }
 
+            if (isMoveBonus)
+            {
+                return Color.white;
+            }
+
             if (isCatapult)
             {
                 return Color.white;
@@ -288,7 +355,7 @@ namespace ProjectExtinguisher.Gameplay.Hex
 
         private string BuildStateSummary()
         {
-            return $"[active={isActive}, walkable={isWalkable}, start={isStart}, goal={isGoal}, highlighted={isHighlighted}, catapult={isCatapult}, direction={catapultDirection}, launchDistance={CatapultLaunchDistance}]";
+            return $"[active={isActive}, walkable={isWalkable}, start={isStart}, goal={isGoal}, highlighted={isHighlighted}, catapult={isCatapult}, direction={catapultDirection}, launchDistance={CatapultLaunchDistance}, moveBonus={isMoveBonus}, moveBonusAmount={MoveBonusAmount}, moveBonusConsumed={moveBonusConsumed}]";
         }
 
         private void Log(string message)

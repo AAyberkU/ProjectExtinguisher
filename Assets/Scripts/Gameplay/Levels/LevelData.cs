@@ -16,6 +16,8 @@ namespace ProjectExtinguisher.Gameplay.Levels
             public bool initiallyActive;
             public bool catapult;
             public HexCell.CatapultDirection catapultDirection;
+            public bool moveBonus;
+            public int moveBonusAmount;
             public bool usePathVariant;
             public int pathVariantIndex;
         }
@@ -55,6 +57,16 @@ namespace ProjectExtinguisher.Gameplay.Levels
         {
             levelNumber = Mathf.Max(1, levelNumber);
             moveLimit = Mathf.Max(0, moveLimit);
+
+            for (int index = 0; index < cellStates.Count; index++)
+            {
+                CellLevelState cellState = cellStates[index];
+                if (cellState.moveBonusAmount < 1)
+                {
+                    cellState.moveBonusAmount = 1;
+                    cellStates[index] = cellState;
+                }
+            }
         }
     }
 }

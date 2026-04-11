@@ -115,6 +115,9 @@ MonoBehaviour:
   isCatapult: 0
   catapultDirection: 0
   catapultLaunchDistance: 2
+  isMoveBonus: 0
+  moveBonusAmount: 1
+  moveBonusConsumed: 0
   spriteRenderer: {fileID: 8536570607151354932}
   cellCollider: {fileID: 8205319921112801605}
   driveSpriteColor: 1

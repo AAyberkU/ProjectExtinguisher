@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -8250205929016015008, guid: 1a0f152144a23f5429d368ae6065e9c7, type: 3}
+  m_Sprite: {fileID: 3842018695705076438, guid: c8f16dd986b75c4408088d59d1c6bed7, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -115,6 +115,9 @@ MonoBehaviour:
   isCatapult: 1
   catapultDirection: 0
   catapultLaunchDistance: 2
+  isMoveBonus: 0
+  moveBonusAmount: 1
+  moveBonusConsumed: 0
   spriteRenderer: {fileID: 7604655000333440118}
   cellCollider: {fileID: 1749474559673888973}
   driveSpriteColor: 1
@@ -158,8 +161,8 @@ PolygonCollider2D:
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 9.990001, y: 11.680227}
+    pivot: {x: 0.49544016, y: 0.5125462}
+    oldSize: {x: 9.95, y: 11.640225}
     newSize: {x: 9.9800005, y: 11.640225}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -167,10 +170,10 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -4.9381914, y: -2.920336}
-      - {x: -0.10230387, y: -5.778089}
-      - {x: 4.9566884, y: -2.9020813}
-      - {x: 4.935724, y: 2.7564578}
-      - {x: -0.092111625, y: 5.7704616}
-      - {x: -4.895458, y: 2.969172}
+    - - {x: -4.911144, y: -3.0810764}
+      - {x: -0.0472567, y: -5.924882}
+      - {x: 5.0007257, y: -3.0404856}
+      - {x: 4.9947953, y: 2.6278667}
+      - {x: -0.034899216, y: 5.6329265}
+      - {x: -4.8578715, y: 2.8433716}
   m_UseDelaunayMesh: 1

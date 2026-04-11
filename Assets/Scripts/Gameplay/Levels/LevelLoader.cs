@@ -32,6 +32,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
         [SerializeField] private Sprite goalSprite;
         [SerializeField] private Sprite blockedSprite;
         [SerializeField] private Sprite catapultSprite;
+        [SerializeField] private Sprite healthSprite;
         [SerializeField] private List<Sprite> blockedVariantSprites = new();
         [SerializeField] private List<Sprite> pathVariantSprites = new();
 
@@ -231,7 +232,12 @@ namespace ProjectExtinguisher.Gameplay.Levels
                     catapultSprite = cell.CurrentSprite;
                 }
 
-                if (defaultPathSprite == null && cell.IsWalkable && !cell.IsStart && !cell.IsGoal && !cell.IsCatapult)
+                if (healthSprite == null && cell.IsMoveBonus)
+                {
+                    healthSprite = cell.CurrentSprite;
+                }
+
+                if (defaultPathSprite == null && cell.IsWalkable && !cell.IsStart && !cell.IsGoal && !cell.IsCatapult && !cell.IsMoveBonus)
                 {
                     defaultPathSprite = cell.CurrentSprite;
                 }
@@ -247,6 +253,8 @@ namespace ProjectExtinguisher.Gameplay.Levels
             bool walkable = true;
             bool isCatapult = false;
             HexCell.CatapultDirection catapultDirection = HexCell.CatapultDirection.E;
+            bool isMoveBonus = false;
+            int moveBonusAmount = 1;
             bool useVisualVariant = false;
             int visualVariantIndex = -1;
 
@@ -256,6 +264,8 @@ namespace ProjectExtinguisher.Gameplay.Levels
                 active = overrideState.initiallyActive;
                 isCatapult = overrideState.catapult;
                 catapultDirection = overrideState.catapultDirection;
+                isMoveBonus = overrideState.moveBonus;
+                moveBonusAmount = Mathf.Max(1, overrideState.moveBonusAmount);
                 useVisualVariant = overrideState.usePathVariant;
                 visualVariantIndex = overrideState.pathVariantIndex;
             }
@@ -271,11 +281,12 @@ namespace ProjectExtinguisher.Gameplay.Levels
             }
 
             cell.ConfigureCatapult(isCatapult, catapultDirection);
+            cell.ConfigureMoveBonus(isMoveBonus, moveBonusAmount);
             cell.ApplyState(active, walkable, isStart, isGoal, false);
-            ApplyCellSprite(cell, walkable, isStart, isGoal, isCatapult, useVisualVariant, visualVariantIndex);
+            ApplyCellSprite(cell, walkable, isStart, isGoal, isCatapult, isMoveBonus, useVisualVariant, visualVariantIndex);
         }
 
-        private void ApplyCellSprite(HexCell cell, bool walkable, bool isStart, bool isGoal, bool isCatapult, bool useVisualVariant, int visualVariantIndex)
+        private void ApplyCellSprite(HexCell cell, bool walkable, bool isStart, bool isGoal, bool isCatapult, bool isMoveBonus, bool useVisualVariant, int visualVariantIndex)
         {
             if (cell == null)
             {
@@ -287,6 +298,10 @@ namespace ProjectExtinguisher.Gameplay.Levels
             if (isCatapult)
             {
                 sprite = catapultSprite;
+            }
+            else if (isMoveBonus)
+            {
+                sprite = healthSprite;
             }
             else if (!walkable)
             {

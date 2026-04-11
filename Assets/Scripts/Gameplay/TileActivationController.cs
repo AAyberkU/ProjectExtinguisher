@@ -20,6 +20,7 @@ namespace ProjectExtinguisher.Gameplay
             public bool IsStart;
             public bool IsGoal;
             public bool IsHighlighted;
+            public bool IsMoveBonusConsumed;
         }
 
         [Header("Debug")]
@@ -151,7 +152,8 @@ namespace ProjectExtinguisher.Gameplay
                     IsWalkable = cell.IsWalkable,
                     IsStart = cell.IsStart,
                     IsGoal = cell.IsGoal,
-                    IsHighlighted = cell.IsHighlighted
+                    IsHighlighted = cell.IsHighlighted,
+                    IsMoveBonusConsumed = cell.IsMoveBonusConsumed
                 });
             }
 
@@ -202,6 +204,7 @@ namespace ProjectExtinguisher.Gameplay
                     snapshot.IsStart,
                     snapshot.IsGoal,
                     snapshot.IsHighlighted);
+                snapshot.Cell.SetMoveBonusConsumed(snapshot.IsMoveBonusConsumed);
             }
 
             planningMovesRemaining = planningMoveLimit;
@@ -356,8 +359,15 @@ namespace ProjectExtinguisher.Gameplay
             HexCell finalCell = landedCell;
             int chainCount = 0;
 
-            while (finalCell != null && finalCell.IsCatapult && chainCount < maxCatapultChainCount)
+            while (finalCell != null)
             {
+                TryApplyLandingMoveBonus(finalCell);
+
+                if (!finalCell.IsCatapult || chainCount >= maxCatapultChainCount)
+                {
+                    break;
+                }
+
                 if (!TryResolveCatapultDestination(finalCell, out HexCell launchDestination))
                 {
                     break;
@@ -403,6 +413,17 @@ namespace ProjectExtinguisher.Gameplay
             {
                 yield return null;
             }
+        }
+
+        private void TryApplyLandingMoveBonus(HexCell landedCell)
+        {
+            if (landedCell == null || !landedCell.TryConsumeMoveBonus(out int bonusAmount))
+            {
+                return;
+            }
+
+            planningMovesRemaining += bonusAmount;
+            Log($"Move bonus tile at {DescribeCell(landedCell)} granted {bonusAmount} move(s). Remaining moves: {planningMovesRemaining}.");
         }
 
         private bool TryResolveCatapultDestination(HexCell catapultCell, out HexCell destinationCell)
