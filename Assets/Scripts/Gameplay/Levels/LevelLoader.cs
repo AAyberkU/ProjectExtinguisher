@@ -18,6 +18,9 @@ namespace ProjectExtinguisher.Gameplay.Levels
         [SerializeField] private LarryController larryController;
         [SerializeField] private GameHUD gameHUD;
 
+        [Header("Progression")]
+        [SerializeField] private List<LevelData> orderedLevels = new();
+
         [Header("Application")]
         [SerializeField] private bool applySelectedLevelOnStart = true;
         [SerializeField] private bool defaultInitialActiveState;
@@ -31,8 +34,13 @@ namespace ProjectExtinguisher.Gameplay.Levels
         [SerializeField] private List<Sprite> pathVariantSprites = new();
 
         private readonly Dictionary<Vector2Int, LevelData.CellLevelState> stateByCoordinate = new();
+        private LevelData currentLevel;
+        private int currentLevelIndex = -1;
 
         public LevelData SelectedLevel => selectedLevel;
+        public LevelData CurrentLevel => currentLevel;
+        public int CurrentLevelIndex => currentLevelIndex;
+        public bool HasNextLevel => TryGetNextLevel(out _);
 
         private void Reset()
         {
@@ -46,9 +54,13 @@ namespace ProjectExtinguisher.Gameplay.Levels
 
         private void Start()
         {
-            if (applySelectedLevelOnStart && selectedLevel != null)
+            if (applySelectedLevelOnStart)
             {
-                ApplySelectedLevel();
+                LevelData startupLevel = GetStartupLevel();
+                if (startupLevel != null)
+                {
+                    ApplyLevel(startupLevel);
+                }
             }
         }
 
@@ -61,6 +73,42 @@ namespace ProjectExtinguisher.Gameplay.Levels
         public void ApplySelectedLevel()
         {
             ApplyLevel(selectedLevel);
+        }
+
+        public bool LoadNextLevel()
+        {
+            if (!TryGetNextLevel(out LevelData nextLevel))
+            {
+                Log("LoadNextLevel skipped because there is no next level configured.");
+                return false;
+            }
+
+            ApplyLevel(nextLevel);
+            return true;
+        }
+
+        public bool TryGetNextLevel(out LevelData nextLevel)
+        {
+            nextLevel = null;
+
+            if (orderedLevels.Count == 0)
+            {
+                return false;
+            }
+
+            int startIndex = currentLevelIndex >= 0 ? currentLevelIndex + 1 : 0;
+            for (int index = startIndex; index < orderedLevels.Count; index++)
+            {
+                if (orderedLevels[index] == null)
+                {
+                    continue;
+                }
+
+                nextLevel = orderedLevels[index];
+                return true;
+            }
+
+            return false;
         }
 
         public void ApplyLevel(LevelData level)
@@ -100,6 +148,8 @@ namespace ProjectExtinguisher.Gameplay.Levels
                 return;
             }
 
+            SetCurrentLevel(level);
+
             IReadOnlyList<HexCell> cells = gridManager.GetAllCells();
             for (int index = 0; index < cells.Count; index++)
             {
@@ -116,6 +166,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
 
             if (gameHUD != null)
             {
+                gameHUD.BindLevelLoader(this);
                 gameHUD.SetLevelLabel(level.GetDisplayName());
             }
 
@@ -276,6 +327,54 @@ namespace ProjectExtinguisher.Gameplay.Levels
             {
                 gameHUD = FindFirstObjectByType<GameHUD>();
             }
+
+            if (gameHUD != null)
+            {
+                gameHUD.BindLevelLoader(this);
+            }
+        }
+
+        private LevelData GetStartupLevel()
+        {
+            if (selectedLevel != null)
+            {
+                return selectedLevel;
+            }
+
+            for (int index = 0; index < orderedLevels.Count; index++)
+            {
+                if (orderedLevels[index] != null)
+                {
+                    return orderedLevels[index];
+                }
+            }
+
+            return null;
+        }
+
+        private void SetCurrentLevel(LevelData level)
+        {
+            currentLevel = level;
+            selectedLevel = level;
+            currentLevelIndex = FindLevelIndex(level);
+        }
+
+        private int FindLevelIndex(LevelData level)
+        {
+            if (level == null)
+            {
+                return -1;
+            }
+
+            for (int index = 0; index < orderedLevels.Count; index++)
+            {
+                if (orderedLevels[index] == level)
+                {
+                    return index;
+                }
+            }
+
+            return -1;
         }
 
         private void Log(string message)

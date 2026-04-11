@@ -1,8 +1,8 @@
 ## Status
 
-- Project is in playable-prototype phase with a complete core loop, HUD, and first level-data pipeline.
+- Project is in playable-prototype phase with a complete core loop, HUD, and session-based multi-level progression.
 - Implemented: `HexCell`, `HexGridManager`, `GameState`, `TileActivationController`, `LarryController`, `GameHUD`, `LevelData`, and `LevelLoader`.
-- `GameplayScene` contains a 61-cell pointy-top hex board, Larry pawn, win/fail resolution, a live HUD, and a selected level asset applied through the loader.
+- `GameplayScene` contains a 61-cell pointy-top hex board, Larry pawn, win/fail resolution, a live HUD, and two playable levels with in-session progression.
 
 ## Completed
 
@@ -29,13 +29,17 @@
 - Created `Assets/Levels/Level_001.asset` as the first level data asset.
 - Updated the scene to use the artist-provided pointy-top board layout with corrected scale/rotation so the 61-cell map no longer overlaps and fits the camera.
 - Applied a small post-processing profile adjustment while tuning the current scene presentation.
+- Created `Assets/Levels/Level_002.asset` with a different start/goal placement and randomized path variants.
+- Added session-based level progression to `LevelLoader`: game starts from Level 1, a `Next Level` button appears on win, reset/fail restart the currently active level.
+- Added `Next Level` button to the HUD outcome overlay, visible only on win when a next level exists; shows a final-level replay message when no next level is available.
+- Added `EventSystem` to scene and UI guard in `TileActivationController` so gameplay clicks are blocked while pointer is over UI.
 
 ## Architecture Snapshot
 
 - Current gameplay code centers on `HexCell`, `HexGridManager`, `GameState`, `TileActivationController`, `LarryController`, `GameHUD`, `LevelData`, and `LevelLoader`.
 - `GameplayScene` contains a `GridRoot`, a registered 61-cell pointy-top hex board, a Larry pawn, an active step-by-step interaction loop, and a selected level asset.
 - All scene tiles are prefab instances under `GridRoot/Cells` and are driven by `HexCell` state plus `HexGridManager` registration.
-- `LevelLoader` applies move limit, start/goal placement, per-cell state, and optional path-art variants onto the shared board.
+- `LevelLoader` owns an ordered level list, tracks the current session level, and exposes `LoadNextLevel()`, `HasNextLevel`, and `CurrentLevel` for HUD-driven progression.
 - Larry is now the live reference point for interaction: each valid click activates a neighboring tile, consumes one move, and immediately moves Larry one step.
 - `TileActivationController` owns win/fail flags, locks input on outcome, and calls `GameHUD.ResetHUD()` on reset.
 - `GameHUD` reads controller state each frame and drives all 5 HUD elements: moves counter, level label, reset hint, outcome overlay, gameplay hint.
@@ -44,11 +48,11 @@
 
 ## Immediate Next Steps
 
-1. Create `Level_002` and `Level_003` data assets on top of the shared board.
-2. Implement level transition / progression flow between loaded levels.
-3. Add blocked tile art and update `BlockedHexCell` prefab.
-4. Polish HUD visuals and remaining game-feel details.
+1. Create `Level_003` data asset to complete the initial 3-level set.
+2. Add blocked tile art and update `BlockedHexCell` prefab.
+3. Polish HUD visuals and game-feel details.
+4. Consider a level-select or menu screen once the core level set is finalized.
 
 ## Notes
 
-- The core prototype loop is complete: tile activation, Larry movement, win/fail resolution, and HUD feedback all work together.
+- The core prototype loop is complete: tile activation, Larry movement, win/fail resolution, HUD feedback, and session-based level progression all work together.

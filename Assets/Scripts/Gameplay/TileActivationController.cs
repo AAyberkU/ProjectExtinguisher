@@ -3,6 +3,7 @@ using ProjectExtinguisher.Gameplay.Hex;
 using ProjectExtinguisher.Gameplay.Larry;
 using ProjectExtinguisher.UI;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
@@ -259,6 +260,12 @@ namespace ProjectExtinguisher.Gameplay
             Mouse mouse = Mouse.current;
             if (mouse == null || !mouse.leftButton.wasPressedThisFrame)
             {
+                return;
+            }
+
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                Log("Ignored planning click because the pointer is over UI.");
                 return;
             }
 

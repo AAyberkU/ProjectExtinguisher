@@ -68,14 +68,14 @@
 | Moves Left counter | Top-left | Large text; color shifts: normal → amber (≤50%) → red (≤25%) |
 | Level label | Top-center | Small text; shows current level name/number (e.g. `Level 1`) |
 | Reset hint | Top-right | Small `R  Reset` label; always visible during play |
-| Win/Lose overlay | Center | Hidden during play; shows `You Win` or `Out of Moves` + sub-line `Press R to reset`; fades/slides in on outcome |
+| Win/Lose overlay | Center | Hidden during play; shows `You Win` or `Out of Moves` + sub-line; fades/slides in on outcome; on win shows `Next Level` button if available, else `Final Level - Press R to replay` |
 | Gameplay hint | Bottom-center | Single-line helper text; fades out after a configurable number of seconds |
 
 ### Style
 
 - Minimal and semi-transparent so the board remains the primary focus.
 - Hex-corner motif on panels where possible.
-- Canvas render mode: Screen Space – Overlay; `GraphicRaycaster` disabled so HUD does not intercept gameplay clicks.
+- Canvas render mode: Screen Space – Overlay; `GraphicRaycaster` enabled for outcome-button interaction; gameplay click guard blocks tile clicks while pointer is over UI.
 
 ## 7. Level Structure
 
@@ -89,9 +89,11 @@
   - goal cell coordinate
   - blocked cell coordinates
   - optional path-art variant assignments
-- `LevelLoader` now reads the selected level data and configures the existing gameplay scene at runtime.
-- The HUD level label now reads from loaded level data.
+- `LevelLoader` reads the selected level data and configures the existing gameplay scene at runtime.
+- `LevelLoader` holds an ordered level list for session-based progression; `LoadNextLevel()` advances to the next asset without reloading the scene.
+- The HUD level label reads from loaded level data; the win overlay shows a `Next Level` button if a next level exists in the ordered list.
+- Reset and fail always restart the currently active session level.
 
 <environment_details>
-Current time: 2026-04-11T17:20:48+03:00
+Current time: 2026-04-11T18:17:41+03:00
 </environment_details>

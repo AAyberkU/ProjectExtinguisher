@@ -35,9 +35,9 @@ namespace ProjectExtinguisher.Editor
             scaler.referenceResolution = new Vector2(1920f, 1080f);
             scaler.matchWidthOrHeight  = 0.5f;
 
-            // Disable raycaster so HUD never intercepts gameplay clicks
+            // Keep raycaster enabled so outcome actions remain clickable.
             var raycaster = canvasGO.AddComponent<GraphicRaycaster>();
-            raycaster.enabled = false;
+            raycaster.enabled = true;
 
             // ── 2. Top-left: Moves Left ───────────────────────────────────────
             var movesLabel = MakeLabel(
@@ -80,10 +80,11 @@ namespace ProjectExtinguisher.Editor
             panelRT.anchorMax        = new Vector2(0.5f, 0.5f);
             panelRT.pivot            = new Vector2(0.5f, 0.5f);
             panelRT.anchoredPosition = Vector2.zero;
-            panelRT.sizeDelta        = new Vector2(560f, 200f);
+            panelRT.sizeDelta        = new Vector2(560f, 260f);
 
             var panelImg = panelGO.AddComponent<Image>();
             panelImg.color = new Color(0.05f, 0.05f, 0.05f, 0.72f);
+            panelImg.raycastTarget = false;
 
             var panelCG = panelGO.AddComponent<CanvasGroup>();
             panelCG.alpha          = 0f;
@@ -107,8 +108,19 @@ namespace ProjectExtinguisher.Editor
                 new Color(0.85f, 0.85f, 0.85f, 1f),
                 new Vector2(0f, 0.5f), new Vector2(1f, 0.5f),
                 new Vector2(0.5f, 0.5f),
-                new Vector2(0f, -28f),
+                new Vector2(0f, -18f),
                 new Vector2(0f, 40f));
+
+            var nextLevelButton = MakeButton(
+                "NextLevelButton", panelGO.transform,
+                "Next Level",
+                new Vector2(0.5f, 0f), new Vector2(0.5f, 0f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(0f, 36f),
+                new Vector2(240f, 56f),
+                out var nextLevelButtonLabel);
+
+            nextLevelButton.gameObject.SetActive(false);
 
             // ── 6. Bottom-center: Gameplay hint ───────────────────────────────
             var hintLabel = MakeLabel(
@@ -131,6 +143,8 @@ namespace ProjectExtinguisher.Editor
             so.FindProperty("outcomePanel").objectReferenceValue      = panelCG;
             so.FindProperty("outcomeHeadline").objectReferenceValue   = headlineLabel;
             so.FindProperty("outcomeSubline").objectReferenceValue    = sublineLabel;
+            so.FindProperty("nextLevelButton").objectReferenceValue   = nextLevelButton;
+            so.FindProperty("nextLevelButtonLabel").objectReferenceValue = nextLevelButtonLabel;
             so.FindProperty("gameplayHintLabel").objectReferenceValue = hintLabel;
 
             var controller = Object.FindFirstObjectByType<TileActivationController>();
@@ -171,7 +185,56 @@ namespace ProjectExtinguisher.Editor
             tmp.fontSize  = fontSize;
             tmp.alignment = align;
             tmp.color     = color;
+            tmp.raycastTarget = false;
             return tmp;
+        }
+
+        private static Button MakeButton(
+            string goName, Transform parent, string text,
+            Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot,
+            Vector2 anchoredPos, Vector2 sizeDelta,
+            out TMP_Text label)
+        {
+            var go = new GameObject(goName);
+            go.transform.SetParent(parent, false);
+
+            var rt = go.AddComponent<RectTransform>();
+            rt.anchorMin = anchorMin;
+            rt.anchorMax = anchorMax;
+            rt.pivot = pivot;
+            rt.anchoredPosition = anchoredPos;
+            rt.sizeDelta = sizeDelta;
+
+            var image = go.AddComponent<Image>();
+            image.color = new Color(0.92f, 0.92f, 0.92f, 0.96f);
+
+            var button = go.AddComponent<Button>();
+            var colors = button.colors;
+            colors.normalColor = new Color(1f, 1f, 1f, 1f);
+            colors.highlightedColor = new Color(0.92f, 0.98f, 0.92f, 1f);
+            colors.pressedColor = new Color(0.78f, 0.90f, 0.78f, 1f);
+            colors.selectedColor = colors.highlightedColor;
+            colors.disabledColor = new Color(1f, 1f, 1f, 0.5f);
+            button.colors = colors;
+            button.targetGraphic = image;
+
+            label = MakeLabel(
+                "Label", go.transform,
+                text, 24f,
+                TextAlignmentOptions.Center,
+                new Color(0.08f, 0.08f, 0.08f, 1f),
+                Vector2.zero, Vector2.one,
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                Vector2.zero);
+
+            if (label.TryGetComponent(out RectTransform labelRect))
+            {
+                labelRect.offsetMin = Vector2.zero;
+                labelRect.offsetMax = Vector2.zero;
+            }
+
+            return button;
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using ProjectExtinguisher.Gameplay;
+using ProjectExtinguisher.Gameplay.Levels;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -22,6 +23,7 @@ namespace ProjectExtinguisher.UI
 
         [Header("References")]
         [SerializeField] private TileActivationController controller;
+        [SerializeField] private LevelLoader levelLoader;
 
         [Header("Moves Left")]
         [SerializeField] private TMP_Text movesLeftLabel;
@@ -45,9 +47,13 @@ namespace ProjectExtinguisher.UI
         [SerializeField] private CanvasGroup outcomePanel;
         [SerializeField] private TMP_Text outcomeHeadline;
         [SerializeField] private TMP_Text outcomeSubline;
+        [SerializeField] private Button nextLevelButton;
+        [SerializeField] private TMP_Text nextLevelButtonLabel;
         [SerializeField] private string winHeadline  = "You Win";
         [SerializeField] private string loseHeadline = "Out of Moves";
         [SerializeField] private string outcomeSublineText = "Press R to reset";
+        [SerializeField] private string finalLevelSublineText = "Final Level - Press R to replay";
+        [SerializeField] private string nextLevelButtonText = "Next Level";
         [SerializeField] [Min(0f)] private float outcomeFadeDuration = 0.45f;
         [SerializeField] private Vector2 outcomeSlideOffset = new Vector2(0f, -30f);
 
@@ -78,6 +84,7 @@ namespace ProjectExtinguisher.UI
             }
 
             SetOutcomePanelAlpha(0f);
+            SetNextLevelButtonVisible(false);
             outcomeShown = false;
 
             if (gameplayHintLabel != null)
@@ -111,6 +118,12 @@ namespace ProjectExtinguisher.UI
             Log($"Level label set to '{levelDisplayName}'.");
         }
 
+        public void BindLevelLoader(LevelLoader loader)
+        {
+            levelLoader = loader;
+            UpdateNextLevelButtonLabel();
+        }
+
         // ──────────────────────────────────────────────────────────────────────────
         // Unity lifecycle
         // ──────────────────────────────────────────────────────────────────────────
@@ -118,11 +131,14 @@ namespace ProjectExtinguisher.UI
         private void Reset()
         {
             TryCacheController();
+            TryCacheLevelLoader();
         }
 
         private void Awake()
         {
             TryCacheController();
+            TryCacheLevelLoader();
+            RegisterNextLevelButton();
         }
 
         private void Start()
@@ -140,6 +156,7 @@ namespace ProjectExtinguisher.UI
 
             // Hide outcome panel immediately
             SetOutcomePanelAlpha(0f);
+            SetNextLevelButtonVisible(false);
             outcomeShown = false;
 
             // Show gameplay hint then fade it
@@ -218,6 +235,7 @@ namespace ProjectExtinguisher.UI
         private void ShowOutcome(bool isWin)
         {
             outcomeShown = true;
+            bool canLoadNextLevel = isWin && levelLoader != null && levelLoader.HasNextLevel;
 
             if (outcomeHeadline != null)
             {
@@ -226,8 +244,10 @@ namespace ProjectExtinguisher.UI
 
             if (outcomeSubline != null)
             {
-                outcomeSubline.text = outcomeSublineText;
+                outcomeSubline.text = isWin && !canLoadNextLevel ? finalLevelSublineText : outcomeSublineText;
             }
+
+            SetNextLevelButtonVisible(canLoadNextLevel);
 
             if (outcomeRoutine != null)
             {
@@ -236,6 +256,14 @@ namespace ProjectExtinguisher.UI
 
             outcomeRoutine = StartCoroutine(FadeInOutcome());
             Log($"Outcome shown: {(isWin ? "Win" : "Lose")}.");
+        }
+
+        private void OnDestroy()
+        {
+            if (nextLevelButton != null)
+            {
+                nextLevelButton.onClick.RemoveListener(HandleNextLevelClicked);
+            }
         }
 
         // ──────────────────────────────────────────────────────────────────────────
@@ -339,6 +367,55 @@ namespace ProjectExtinguisher.UI
             {
                 controller = FindFirstObjectByType<TileActivationController>();
             }
+        }
+
+        private void TryCacheLevelLoader()
+        {
+            if (levelLoader == null)
+            {
+                levelLoader = FindFirstObjectByType<LevelLoader>();
+            }
+        }
+
+        private void RegisterNextLevelButton()
+        {
+            if (nextLevelButton == null)
+            {
+                return;
+            }
+
+            nextLevelButton.onClick.RemoveListener(HandleNextLevelClicked);
+            nextLevelButton.onClick.AddListener(HandleNextLevelClicked);
+            UpdateNextLevelButtonLabel();
+        }
+
+        private void HandleNextLevelClicked()
+        {
+            if (levelLoader == null)
+            {
+                return;
+            }
+
+            levelLoader.LoadNextLevel();
+        }
+
+        private void UpdateNextLevelButtonLabel()
+        {
+            if (nextLevelButtonLabel != null)
+            {
+                nextLevelButtonLabel.text = nextLevelButtonText;
+            }
+        }
+
+        private void SetNextLevelButtonVisible(bool visible)
+        {
+            if (nextLevelButton == null)
+            {
+                return;
+            }
+
+            nextLevelButton.gameObject.SetActive(visible);
+            nextLevelButton.interactable = visible;
         }
 
         private void Log(string message)
