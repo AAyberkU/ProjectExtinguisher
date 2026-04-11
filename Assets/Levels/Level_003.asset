@@ -14,113 +14,106 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectExtinguisher.Gameplay.Levels.LevelData
   levelNumber: 3
   levelName: Level 3
-  moveLimit: 5
-  startCell: {x: -4, y: 3}
-  goalCell: {x: 4, y: -3}
+  moveLimit: 7
+  startCell: {x: 1, y: 3}
+  goalCell: {x: 2, y: -4}
   defaultInitialActiveState: 0
   cellStates:
-  - coordinate: {x: -4, y: 2}
-    blocked: 0
+  - coordinate: {x: 2, y: 2}
+    blocked: 1
+    initiallyActive: 0
+    catapult: 0
+    catapultDirection: 0
+    usePathVariant: 1
+    pathVariantIndex: 0
+  - coordinate: {x: -1, y: 2}
+    blocked: 1
     initiallyActive: 0
     catapult: 0
     catapultDirection: 0
     usePathVariant: 1
     pathVariantIndex: 1
-  - coordinate: {x: -3, y: 3}
-    blocked: 0
+  - coordinate: {x: -3, y: 2}
+    blocked: 1
     initiallyActive: 0
-    catapult: 1
+    catapult: 0
     catapultDirection: 0
-    usePathVariant: 0
+    usePathVariant: 1
+    pathVariantIndex: 2
+  - coordinate: {x: -2, y: 0}
+    blocked: 1
+    initiallyActive: 0
+    catapult: 0
+    catapultDirection: 0
+    usePathVariant: 1
     pathVariantIndex: 0
+  - coordinate: {x: 1, y: -1}
+    blocked: 1
+    initiallyActive: 0
+    catapult: 0
+    catapultDirection: 0
+    usePathVariant: 1
+    pathVariantIndex: 1
   - coordinate: {x: -2, y: 3}
-    blocked: 0
-    initiallyActive: 0
-    catapult: 0
-    catapultDirection: 0
-    usePathVariant: 1
-    pathVariantIndex: 6
-  - coordinate: {x: -1, y: 3}
-    blocked: 0
-    initiallyActive: 0
-    catapult: 0
-    catapultDirection: 0
-    usePathVariant: 1
-    pathVariantIndex: 3
-  - coordinate: {x: -1, y: 2}
     blocked: 0
     initiallyActive: 0
     catapult: 1
     catapultDirection: 1
     usePathVariant: 0
     pathVariantIndex: 0
-  - coordinate: {x: 0, y: 1}
-    blocked: 0
-    initiallyActive: 0
-    catapult: 0
-    catapultDirection: 0
-    usePathVariant: 1
-    pathVariantIndex: 8
-  - coordinate: {x: 1, y: 0}
-    blocked: 0
-    initiallyActive: 0
-    catapult: 0
-    catapultDirection: 0
-    usePathVariant: 1
-    pathVariantIndex: 4
-  - coordinate: {x: 2, y: 0}
+  - coordinate: {x: -2, y: 1}
     blocked: 0
     initiallyActive: 0
     catapult: 1
     catapultDirection: 2
     usePathVariant: 0
     pathVariantIndex: 0
+  - coordinate: {x: 0, y: 0}
+    blocked: 0
+    initiallyActive: 0
+    catapult: 1
+    catapultDirection: 0
+    usePathVariant: 0
+    pathVariantIndex: 0
+  - coordinate: {x: 0, y: 2}
+    blocked: 0
+    initiallyActive: 0
+    catapult: 1
+    catapultDirection: 3
+    usePathVariant: 0
+    pathVariantIndex: 0
+  - coordinate: {x: -1, y: -2}
+    blocked: 0
+    initiallyActive: 0
+    catapult: 1
+    catapultDirection: 1
+    usePathVariant: 0
+    pathVariantIndex: 0
   - coordinate: {x: 2, y: -1}
     blocked: 0
+    initiallyActive: 0
+    catapult: 1
+    catapultDirection: 3
+    usePathVariant: 0
+    pathVariantIndex: 0
+  - coordinate: {x: 3, y: 0}
+    blocked: 0
+    initiallyActive: 0
+    catapult: 1
+    catapultDirection: 2
+    usePathVariant: 0
+    pathVariantIndex: 0
+  - coordinate: {x: 3, y: -3}
+    blocked: 0
+    initiallyActive: 0
+    catapult: 1
+    catapultDirection: 3
+    usePathVariant: 0
+    pathVariantIndex: 0
+  - coordinate: {x: 2, y: -3}
+    blocked: 1
     initiallyActive: 0
     catapult: 0
     catapultDirection: 0
     usePathVariant: 1
     pathVariantIndex: 2
-  - coordinate: {x: 3, y: -2}
-    blocked: 0
-    initiallyActive: 0
-    catapult: 0
-    catapultDirection: 0
-    usePathVariant: 1
-    pathVariantIndex: 7
-  - coordinate: {x: 3, y: -3}
-    blocked: 0
-    initiallyActive: 0
-    catapult: 0
-    catapultDirection: 0
-    usePathVariant: 1
-    pathVariantIndex: 5
-  - coordinate: {x: 4, y: -2}
-    blocked: 0
-    initiallyActive: 0
-    catapult: 0
-    catapultDirection: 0
-    usePathVariant: 1
-    pathVariantIndex: 9
-  - coordinate: {x: 0, y: -1}
-    blocked: 0
-    initiallyActive: 0
-    catapult: 1
-    catapultDirection: 4
-    usePathVariant: 0
-    pathVariantIndex: 0
-  - coordinate: {x: -1, y: 0}
-    blocked: 0
-    initiallyActive: 0
-    catapult: 0
-    catapultDirection: 0
-    usePathVariant: 1
-    pathVariantIndex: 0
-  - coordinate: {x: -2, y: 1}
-    blocked: 0
-    initiallyActive: 0
-    catapult: 0
-    catapultDirection: 0
-    usePathVariant: 1
-    pathVariantIndex: 4

@@ -3893,7 +3893,7 @@ MonoBehaviour:
   blockedVariantSprites:
   - {fileID: -2868019670034099769, guid: b97efda68ab38b84db23c1f6d040f86c, type: 3}
   - {fileID: -7184833830507899280, guid: e8e1e58a5380d7c4883d0ae8d96d0368, type: 3}
-  - {fileID: -347702476747834141, guid: fbf467827fe5902499e54594efade730, type: 3}
+  - {fileID: -4875569321281796739, guid: b9b5d07b02699764d988f4c45f4b0860, type: 3}
   pathVariantSprites:
   - {fileID: -347702476747834141, guid: fbf467827fe5902499e54594efade730, type: 3}
   - {fileID: 2436689576485346197, guid: 4f6efdc8fb8021140afc647ac0b409b0, type: 3}
