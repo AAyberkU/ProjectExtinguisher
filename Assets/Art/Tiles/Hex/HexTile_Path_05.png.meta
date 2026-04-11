@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: 554f12d37aec4b349af1c8a5d2876a1f
+guid: 145c65e72519665498c0b79faf395c0c
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3909223923928814340
-    second: "Tile bas\u0327lang\u0131c\u0327 _0"
+      213: 6165875374574306269
+    second: Tile5_0
+  - first:
+      213: -4824726187179442934
+    second: Tile5_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,13 +116,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "Tile bas\u0327lang\u0131c\u0327 _0"
+      name: Tile5_0
       rect:
         serializedVersion: 2
-        x: 1775
-        y: 474
-        width: 994
-        height: 1164
+        x: 760
+        y: 463
+        width: 1022
+        height: 1194
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +131,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: cfca3ca9d85afb9c0800000000000000
-      internalID: -3909223923928814340
+      spriteID: dd384d62cf6919550800000000000000
+      internalID: 6165875374574306269
       vertices: []
       indices: 
       edges: []
@@ -138,7 +141,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: b62b03eb831987f488c7b6375ed4e770
+    spriteID: 800f42bc6aa1aa444ba488b04228b0fe
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +151,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      "Tile bas\u0327lang\u0131c\u0327 _0": -3909223923928814340
+      Tile5_0: 6165875374574306269
+      Tile5_1: -4824726187179442934
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

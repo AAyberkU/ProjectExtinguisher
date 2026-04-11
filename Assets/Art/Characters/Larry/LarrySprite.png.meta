@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 7021a746b9066a148b1ddf04c8362b75
+guid: 134f2fc47f152ca4ca57e7055a0ccdaa
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2436689576485346197
-    second: Tile2_0
+      213: 1856713639428680103
+    second: Piyon_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Tile2_0
+      name: Piyon_0
       rect:
         serializedVersion: 2
-        x: 3277
-        y: 1317
-        width: 997
-        height: 1164
+        x: 2291
+        y: 750
+        width: 444
+        height: 1215
       alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+      pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 59b5e4a724cd0d120800000000000000
-      internalID: 2436689576485346197
+      spriteID: 7a9e4cfb73f54c910800000000000000
+      internalID: 1856713639428680103
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5c40805d791f18249b17bfa034ff17d9
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Tile2_0: 2436689576485346197
+      Piyon_0: 1856713639428680103
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
