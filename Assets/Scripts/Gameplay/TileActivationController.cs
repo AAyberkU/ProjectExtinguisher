@@ -363,6 +363,12 @@ namespace ProjectExtinguisher.Gameplay
                     break;
                 }
 
+                if (planningMovesRemaining <= 0)
+                {
+                    Log($"Catapult at {DescribeCell(finalCell)} could not launch Larry because no planning moves remain.");
+                    break;
+                }
+
                 if (!launchDestination.IsActive)
                 {
                     launchDestination.SetActive(true);
@@ -374,8 +380,9 @@ namespace ProjectExtinguisher.Gameplay
                     break;
                 }
 
+                planningMovesRemaining--;
                 chainCount++;
-                Log($"Catapult chain {chainCount} launched Larry from {DescribeCell(finalCell)} to {DescribeCell(launchDestination)}.");
+                Log($"Catapult chain {chainCount} launched Larry from {DescribeCell(finalCell)} to {DescribeCell(launchDestination)}. Remaining moves: {planningMovesRemaining}.");
 
                 yield return WaitForLarryHopToFinish();
                 finalCell = launchDestination;
