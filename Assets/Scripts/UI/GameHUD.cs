@@ -94,6 +94,23 @@ namespace ProjectExtinguisher.UI
             Log("HUD reset.");
         }
 
+        public void SetLevelLabel(string displayName)
+        {
+            if (string.IsNullOrWhiteSpace(displayName))
+            {
+                return;
+            }
+
+            levelDisplayName = displayName;
+
+            if (levelLabel != null)
+            {
+                levelLabel.text = levelDisplayName;
+            }
+
+            Log($"Level label set to '{levelDisplayName}'.");
+        }
+
         // ──────────────────────────────────────────────────────────────────────────
         // Unity lifecycle
         // ──────────────────────────────────────────────────────────────────────────

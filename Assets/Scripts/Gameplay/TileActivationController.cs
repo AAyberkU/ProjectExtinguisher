@@ -108,6 +108,24 @@ namespace ProjectExtinguisher.Gameplay
             Log($"Game state changed from {previousState} to {currentGameState}.");
         }
 
+        public void ApplyLoadedLevelSetup(int moveLimit)
+        {
+            planningMoveLimit = Mathf.Max(0, moveLimit);
+            planningMovesRemaining = planningMoveLimit;
+            hasWon = false;
+            hasLost = false;
+            currentGameState = GameState.Planning;
+
+            CaptureInitialPlanningState();
+
+            if (gameHUD != null)
+            {
+                gameHUD.ResetHUD();
+            }
+
+            Log($"Applied loaded level setup with move limit {planningMoveLimit}.");
+        }
+
         [ContextMenu("Capture Initial Planning State")]
         public void CaptureInitialPlanningState()
         {

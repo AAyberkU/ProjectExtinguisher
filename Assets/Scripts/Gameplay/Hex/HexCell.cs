@@ -41,6 +41,7 @@ namespace ProjectExtinguisher.Gameplay.Hex
         public bool IsHighlighted => isHighlighted;
         public SpriteRenderer SpriteRenderer => spriteRenderer;
         public Collider2D CellCollider => cellCollider;
+        public Sprite CurrentSprite => spriteRenderer == null ? null : spriteRenderer.sprite;
 
         private void Reset()
         {
@@ -167,6 +168,17 @@ namespace ProjectExtinguisher.Gameplay.Hex
 
             RefreshVisuals();
             Log($"Applied state {BuildStateSummary()} to {gridIndex}.");
+        }
+
+        public void SetVisualSprite(Sprite sprite)
+        {
+            if (spriteRenderer == null || spriteRenderer.sprite == sprite)
+            {
+                return;
+            }
+
+            spriteRenderer.sprite = sprite;
+            Log($"Visual sprite changed on {gridIndex}.");
         }
 
         [ContextMenu("Refresh Visuals")]
