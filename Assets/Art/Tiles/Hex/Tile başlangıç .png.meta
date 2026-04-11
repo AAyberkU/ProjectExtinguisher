@@ -116,12 +116,12 @@ TextureImporter:
       name: "Tile bas\u0327lang\u0131c\u0327 _0"
       rect:
         serializedVersion: 2
-        x: 1772
+        x: 1775
         y: 474
-        width: 1019
+        width: 994
         height: 1164
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: b62b03eb831987f488c7b6375ed4e770
     internalID: 0
     vertices: []
     indices: 

@@ -119,12 +119,12 @@ TextureImporter:
       name: Tile5_0
       rect:
         serializedVersion: 2
-        x: 757
+        x: 760
         y: 463
-        width: 1027
+        width: 1022
         height: 1194
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
@@ -137,33 +137,11 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
-    - serializedVersion: 2
-      name: Tile5_1
-      rect:
-        serializedVersion: 2
-        x: 1799
-        y: 895
-        width: 6
-        height: 438
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: a0df4a268112b0db0800000000000000
-      internalID: -4824726187179442934
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 800f42bc6aa1aa444ba488b04228b0fe
     internalID: 0
     vertices: []
     indices: 
