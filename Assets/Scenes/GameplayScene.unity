@@ -3761,6 +3761,7 @@ MonoBehaviour:
   requireLarryAdjacency: 1
   allowMouseActivation: 1
   allowKeyboardReset: 1
+  maxCatapultChainCount: 8
 --- !u!114 &951144134
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3890,7 +3891,7 @@ MonoBehaviour:
   blockedSprite: {fileID: -347702476747834141, guid: fbf467827fe5902499e54594efade730, type: 3}
   catapultSprite: {fileID: -8250205929016015008, guid: 1a0f152144a23f5429d368ae6065e9c7, type: 3}
   blockedVariantSprites:
-  - {fileID: -4333981499389015006, guid: 0c673883410a0d040ab4338e2839910b, type: 3}
+  - {fileID: -2868019670034099769, guid: b97efda68ab38b84db23c1f6d040f86c, type: 3}
   - {fileID: -7184833830507899280, guid: e8e1e58a5380d7c4883d0ae8d96d0368, type: 3}
   - {fileID: -347702476747834141, guid: fbf467827fe5902499e54594efade730, type: 3}
   pathVariantSprites:
