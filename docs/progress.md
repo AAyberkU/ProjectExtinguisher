@@ -1,6 +1,6 @@
 ## Status
 
-- Project is in playable-prototype phase with a complete core loop, HUD, and session-based multi-level progression.
+- Project is in playable-prototype phase with a complete core loop, HUD, session-based multi-level progression, and updated production art integration.
 - Implemented: `HexCell`, `HexGridManager`, `GameState`, `TileActivationController`, `LarryController`, `GameHUD`, `LevelData`, and `LevelLoader`.
 - `GameplayScene` contains a 61-cell pointy-top hex board, Larry pawn, win/fail resolution, a live HUD, and two playable levels with in-session progression.
 
@@ -33,6 +33,11 @@
 - Added session-based level progression to `LevelLoader`: game starts from Level 1, a `Next Level` button appears on win, reset/fail restart the currently active level.
 - Added `Next Level` button to the HUD outcome overlay, visible only on win when a next level exists; shows a final-level replay message when no next level is available.
 - Added `EventSystem` to scene and UI guard in `TileActivationController` so gameplay clicks are blocked while pointer is over UI.
+- Updated the scene Larry visual to use the imported `LarrySprite` art directly with no runtime tint filter.
+- Simplified `HexCell` tinting so only `inactiveColor` and `highlightColor` are applied; active, start, goal, and blocked tiles now preserve their authored sprite colors.
+- Replaced the single blocked placeholder setup with `BlockedHexCell_01`, `BlockedHexCell_02`, and `BlockedHexCell_03`.
+- Updated `LevelLoader` to support authored blocked visual variants as well as path variants.
+- Redesigned `Level_002` with the new start/goal/obstacle layout and balanced blocked variant usage.
 
 ## Architecture Snapshot
 
@@ -43,15 +48,16 @@
 - Larry is now the live reference point for interaction: each valid click activates a neighboring tile, consumes one move, and immediately moves Larry one step.
 - `TileActivationController` owns win/fail flags, locks input on outcome, and calls `GameHUD.ResetHUD()` on reset.
 - `GameHUD` reads controller state each frame and drives all 5 HUD elements: moves counter, level label, reset hint, outcome overlay, gameplay hint.
-- Art is now organized under `Assets/Art/Characters/Larry/` and `Assets/Art/Tiles/Hex/`; prefab set is `StartHexCell`, `GoalHexCell`, `BlockedHexCell`, `PathHexCell_01..10`.
+- Art is organized under `Assets/Art/Characters/Larry/` and `Assets/Art/Tiles/Hex/`; prefab set is `StartHexCell`, `GoalHexCell`, `BlockedHexCell_01..03`, `PathHexCell_01..10`.
+- `LevelLoader` applies both path and blocked visual variants from authored `LevelData` entries.
 - Pathfinding is no longer part of the planned core loop.
 
 ## Immediate Next Steps
 
 1. Create `Level_003` data asset to complete the initial 3-level set.
-2. Add blocked tile art and update `BlockedHexCell` prefab.
-3. Polish HUD visuals and game-feel details.
-4. Consider a level-select or menu screen once the core level set is finalized.
+2. Polish HUD visuals and game-feel details.
+3. Consider a level-select or menu screen once the core level set is finalized.
+4. Decide whether to add more special tile types beyond the current path/blocked set.
 
 ## Notes
 

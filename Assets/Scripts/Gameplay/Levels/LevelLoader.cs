@@ -31,6 +31,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
         [SerializeField] private Sprite startSprite;
         [SerializeField] private Sprite goalSprite;
         [SerializeField] private Sprite blockedSprite;
+        [SerializeField] private List<Sprite> blockedVariantSprites = new();
         [SerializeField] private List<Sprite> pathVariantSprites = new();
 
         private readonly Dictionary<Vector2Int, LevelData.CellLevelState> stateByCoordinate = new();
@@ -238,15 +239,15 @@ namespace ProjectExtinguisher.Gameplay.Levels
             bool isGoal = coordinate == level.GoalCell;
             bool active = level.DefaultInitialActiveState || defaultInitialActiveState;
             bool walkable = true;
-            bool usePathVariant = false;
-            int pathVariantIndex = -1;
+            bool useVisualVariant = false;
+            int visualVariantIndex = -1;
 
             if (stateByCoordinate.TryGetValue(coordinate, out LevelData.CellLevelState overrideState))
             {
                 walkable = !overrideState.blocked;
                 active = overrideState.initiallyActive;
-                usePathVariant = overrideState.usePathVariant;
-                pathVariantIndex = overrideState.pathVariantIndex;
+                useVisualVariant = overrideState.usePathVariant;
+                visualVariantIndex = overrideState.pathVariantIndex;
             }
 
             if (isStart)
@@ -260,16 +261,27 @@ namespace ProjectExtinguisher.Gameplay.Levels
             }
 
             cell.ApplyState(active, walkable, isStart, isGoal, false);
-            ApplyCellSprite(cell, walkable, isStart, isGoal, usePathVariant, pathVariantIndex);
+            ApplyCellSprite(cell, walkable, isStart, isGoal, useVisualVariant, visualVariantIndex);
         }
 
-        private void ApplyCellSprite(HexCell cell, bool walkable, bool isStart, bool isGoal, bool usePathVariant, int pathVariantIndex)
+        private void ApplyCellSprite(HexCell cell, bool walkable, bool isStart, bool isGoal, bool useVisualVariant, int visualVariantIndex)
         {
             Sprite sprite = null;
 
             if (!walkable)
             {
-                sprite = blockedSprite;
+                if (useVisualVariant && visualVariantIndex >= 0 && visualVariantIndex < blockedVariantSprites.Count)
+                {
+                    sprite = blockedVariantSprites[visualVariantIndex];
+                }
+                else if (blockedSprite != null)
+                {
+                    sprite = blockedSprite;
+                }
+                else if (blockedVariantSprites.Count > 0)
+                {
+                    sprite = blockedVariantSprites[0];
+                }
             }
             else if (isStart)
             {
@@ -279,9 +291,9 @@ namespace ProjectExtinguisher.Gameplay.Levels
             {
                 sprite = goalSprite;
             }
-            else if (usePathVariant && pathVariantIndex >= 0 && pathVariantIndex < pathVariantSprites.Count)
+            else if (useVisualVariant && visualVariantIndex >= 0 && visualVariantIndex < pathVariantSprites.Count)
             {
-                sprite = pathVariantSprites[pathVariantIndex];
+                sprite = pathVariantSprites[visualVariantIndex];
             }
             else
             {

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectExtinguisher.Gameplay.Levels.LevelData
   levelNumber: 1
   levelName: Level 1
-  moveLimit: 12
+  moveLimit: 8
   startCell: {x: -4, y: 0}
   goalCell: {x: 4, y: 0}
   defaultInitialActiveState: 0

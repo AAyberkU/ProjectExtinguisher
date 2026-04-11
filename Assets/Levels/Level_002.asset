@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ProjectExtinguisher.Gameplay.Levels.LevelData
   levelNumber: 2
   levelName: Level 2
-  moveLimit: 10
-  startCell: {x: -4, y: 4}
-  goalCell: {x: 4, y: -4}
+  moveLimit: 9
+  startCell: {x: -4, y: 0}
+  goalCell: {x: 2, y: 2}
   defaultInitialActiveState: 0
   cellStates:
   - coordinate: {x: -4, y: 0}
@@ -55,35 +55,35 @@ MonoBehaviour:
     usePathVariant: 1
     pathVariantIndex: 9
   - coordinate: {x: -3, y: 2}
-    blocked: 0
+    blocked: 1
     initiallyActive: 0
     usePathVariant: 1
-    pathVariantIndex: 8
+    pathVariantIndex: 2
   - coordinate: {x: -3, y: 3}
     blocked: 0
     initiallyActive: 0
     usePathVariant: 1
     pathVariantIndex: 6
   - coordinate: {x: -3, y: 4}
-    blocked: 0
+    blocked: 1
     initiallyActive: 0
     usePathVariant: 1
-    pathVariantIndex: 5
+    pathVariantIndex: 0
   - coordinate: {x: -2, y: -2}
-    blocked: 0
+    blocked: 1
     initiallyActive: 0
     usePathVariant: 1
-    pathVariantIndex: 2
+    pathVariantIndex: 0
   - coordinate: {x: -2, y: -1}
     blocked: 0
     initiallyActive: 0
     usePathVariant: 1
     pathVariantIndex: 4
   - coordinate: {x: -2, y: 0}
-    blocked: 0
+    blocked: 1
     initiallyActive: 0
     usePathVariant: 1
-    pathVariantIndex: 9
+    pathVariantIndex: 1
   - coordinate: {x: -2, y: 1}
     blocked: 0
     initiallyActive: 0
@@ -130,10 +130,10 @@ MonoBehaviour:
     usePathVariant: 1
     pathVariantIndex: 0
   - coordinate: {x: -1, y: 2}
-    blocked: 0
+    blocked: 1
     initiallyActive: 0
     usePathVariant: 1
-    pathVariantIndex: 3
+    pathVariantIndex: 1
   - coordinate: {x: -1, y: 3}
     blocked: 0
     initiallyActive: 0
@@ -160,30 +160,30 @@ MonoBehaviour:
     usePathVariant: 1
     pathVariantIndex: 1
   - coordinate: {x: 0, y: -1}
-    blocked: 0
+    blocked: 1
     initiallyActive: 0
     usePathVariant: 1
-    pathVariantIndex: 5
+    pathVariantIndex: 1
   - coordinate: {x: 0, y: 0}
-    blocked: 0
+    blocked: 1
     initiallyActive: 0
     usePathVariant: 1
-    pathVariantIndex: 4
+    pathVariantIndex: 2
   - coordinate: {x: 0, y: 1}
     blocked: 0
     initiallyActive: 0
     usePathVariant: 1
     pathVariantIndex: 2
   - coordinate: {x: 0, y: 2}
-    blocked: 0
+    blocked: 1
     initiallyActive: 0
     usePathVariant: 1
-    pathVariantIndex: 7
+    pathVariantIndex: 0
   - coordinate: {x: 0, y: 3}
-    blocked: 0
+    blocked: 1
     initiallyActive: 0
     usePathVariant: 1
-    pathVariantIndex: 3
+    pathVariantIndex: 1
   - coordinate: {x: 0, y: 4}
     blocked: 0
     initiallyActive: 0
@@ -215,15 +215,15 @@ MonoBehaviour:
     usePathVariant: 1
     pathVariantIndex: 1
   - coordinate: {x: 1, y: 1}
-    blocked: 0
+    blocked: 1
     initiallyActive: 0
     usePathVariant: 1
-    pathVariantIndex: 6
+    pathVariantIndex: 0
   - coordinate: {x: 1, y: 2}
-    blocked: 0
+    blocked: 1
     initiallyActive: 0
     usePathVariant: 1
-    pathVariantIndex: 4
+    pathVariantIndex: 2
   - coordinate: {x: 1, y: 3}
     blocked: 0
     initiallyActive: 0
@@ -235,10 +235,10 @@ MonoBehaviour:
     usePathVariant: 1
     pathVariantIndex: 5
   - coordinate: {x: 2, y: -3}
-    blocked: 0
+    blocked: 1
     initiallyActive: 0
     usePathVariant: 1
-    pathVariantIndex: 8
+    pathVariantIndex: 2
   - coordinate: {x: 2, y: -2}
     blocked: 0
     initiallyActive: 0

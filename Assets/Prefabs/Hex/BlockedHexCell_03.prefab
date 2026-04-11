@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3465503402210225652}
   - component: {fileID: 1749474559673888973}
   m_Layer: 0
-  m_Name: PathHexCell_07
+  m_Name: BlockedHexCell_03
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -83,8 +83,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 1563408839007489329, guid: 0ec93144a472d3f49a447ce7be50caee, type: 3}
-  m_Color: {r: 0.45, g: 0.48, b: 0.5, a: 1}
+  m_Sprite: {fileID: -347702476747834141, guid: fbf467827fe5902499e54594efade730, type: 3}
+  m_Color: {r: 0.72, g: 0.4, b: 0.4, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -106,9 +106,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProjectExtinguisher.Gameplay.Hex.HexCell
   enableDebugLogs: 1
-  gridIndex: {x: 1, y: 0}
+  gridIndex: {x: 1, y: 1}
   isActive: 0
-  isWalkable: 1
+  isWalkable: 0
   isStart: 0
   isGoal: 0
   isHighlighted: 0
@@ -117,6 +117,10 @@ MonoBehaviour:
   driveSpriteColor: 1
   driveColliderEnabledState: 0
   inactiveColor: {r: 0.45, g: 0.48, b: 0.5, a: 1}
+  activeColor: {r: 0.95, g: 0.97, b: 1, a: 1}
+  blockedColor: {r: 0.72, g: 0.4, b: 0.4, a: 1}
+  startColor: {r: 0.35, g: 0.82, b: 0.45, a: 1}
+  goalColor: {r: 0.95, g: 0.72, b: 0.22, a: 1}
   highlightColor: {r: 0.35, g: 0.85, b: 1, a: 1}
 --- !u!60 &1749474559673888973
 PolygonCollider2D:
@@ -164,10 +168,10 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.10244926, y: -5.7753134}
-      - {x: 4.9494267, y: -2.8985472}
-      - {x: 4.9240575, y: 2.755144}
-      - {x: -0.09777544, y: 5.769234}
-      - {x: -4.907745, y: 2.9869068}
-      - {x: -4.9430523, y: -2.920448}
+    - - {x: -4.9381914, y: -2.920336}
+      - {x: -0.10230387, y: -5.778089}
+      - {x: 4.9566884, y: -2.9020813}
+      - {x: 4.935724, y: 2.7564578}
+      - {x: -0.092111625, y: 5.7704616}
+      - {x: -4.895458, y: 2.969172}
   m_UseDelaunayMesh: 1

@@ -3886,7 +3886,11 @@ MonoBehaviour:
   defaultPathSprite: {fileID: -347702476747834141, guid: fbf467827fe5902499e54594efade730, type: 3}
   startSprite: {fileID: -3909223923928814340, guid: a126c5df3e9b285468a3f1d453568441, type: 3}
   goalSprite: {fileID: -728773534180308246, guid: 7197c9867e2139346975f8b72e91faf3, type: 3}
-  blockedSprite: {fileID: 0}
+  blockedSprite: {fileID: -347702476747834141, guid: fbf467827fe5902499e54594efade730, type: 3}
+  blockedVariantSprites:
+  - {fileID: -4333981499389015006, guid: 0c673883410a0d040ab4338e2839910b, type: 3}
+  - {fileID: -2547540560935805122, guid: f2d096c404c0fa44faca555c4eab2594, type: 3}
+  - {fileID: -347702476747834141, guid: fbf467827fe5902499e54594efade730, type: 3}
   pathVariantSprites:
   - {fileID: -347702476747834141, guid: fbf467827fe5902499e54594efade730, type: 3}
   - {fileID: 2436689576485346197, guid: 4f6efdc8fb8021140afc647ac0b409b0, type: 3}
@@ -4077,8 +4081,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: 077500bc5fd085c49b3f756c8c6c3e5e, type: 3}
-  m_Color: {r: 0.95, g: 0.46, b: 0.18, a: 1}
+  m_Sprite: {fileID: 1856713639428680103, guid: 38732328f6843e745851750c30f585ed, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -4097,8 +4101,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -11.38368, y: -6.042481, z: -0.5}
-  m_LocalScale: {x: 0.42, y: 0.42, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.26, y: 0.26, z: 0.61904764}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 951144135}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

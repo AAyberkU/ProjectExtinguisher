@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 3465503402210225652}
   - component: {fileID: 1749474559673888973}
   m_Layer: 0
-  m_Name: PathHexCell_07
+  m_Name: BlockedHexCell_02
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -83,8 +83,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 1563408839007489329, guid: 0ec93144a472d3f49a447ce7be50caee, type: 3}
-  m_Color: {r: 0.45, g: 0.48, b: 0.5, a: 1}
+  m_Sprite: {fileID: -2547540560935805122, guid: f2d096c404c0fa44faca555c4eab2594, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -106,9 +106,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProjectExtinguisher.Gameplay.Hex.HexCell
   enableDebugLogs: 1
-  gridIndex: {x: 1, y: 0}
+  gridIndex: {x: 1, y: 1}
   isActive: 0
-  isWalkable: 1
+  isWalkable: 0
   isStart: 0
   isGoal: 0
   isHighlighted: 0
@@ -156,7 +156,7 @@ PolygonCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 9.9800005, y: 11.640225}
+    oldSize: {x: 9.9800005, y: 13.140255}
     newSize: {x: 9.9800005, y: 11.640225}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -164,10 +164,10 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.10244926, y: -5.7753134}
-      - {x: 4.9494267, y: -2.8985472}
-      - {x: 4.9240575, y: 2.755144}
-      - {x: -0.09777544, y: 5.769234}
-      - {x: -4.907745, y: 2.9869068}
-      - {x: -4.9430523, y: -2.920448}
+    - - {x: -4.8713336, y: -3.837252}
+      - {x: 0.3030087, y: -6.5295253}
+      - {x: 4.9747024, y: -3.4579384}
+      - {x: 4.844454, y: 2.410343}
+      - {x: 0.0022653202, y: 4.8812284}
+      - {x: -4.9410653, y: 1.8811129}
   m_UseDelaunayMesh: 1

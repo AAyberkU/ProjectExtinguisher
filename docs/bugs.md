@@ -6,7 +6,7 @@
 
 - Board framing currently targets a normal landscape view; narrow aspect ratios or later UI overlays may require camera tuning or dynamic framing.
 - Neighbor logic currently lives inside `TileActivationController`; if a second gameplay system starts using hex adjacency, it should be centralized to avoid rule drift.
-- `BlockedHexCell` prefab still uses placeholder sprite art; blocked tile art is pending.
+- Blocked variant rendering depends on `LevelLoader.blockedVariantSprites` being kept in sync with the blocked prefabs/art set.
 
 ## Fixed
 

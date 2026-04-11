@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 38732328f6843e745851750c30f585ed
+guid: 0c673883410a0d040ab4338e2839910b
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1856713639428680103
-    second: Piyon_0
+      213: -4333981499389015006
+    second: HexTile_Blocked_01_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -113,23 +113,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Piyon_0
+      name: HexTile_Blocked_01_0
       rect:
         serializedVersion: 2
-        x: 2291
-        y: 750
-        width: 444
-        height: 1215
-      alignment: 9
-      pivot: {x: 0.51164174, y: 0.20431617}
+        x: 3278
+        y: 1317
+        width: 996
+        height: 1200
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7a9e4cfb73f54c910800000000000000
-      internalID: 1856713639428680103
+      spriteID: 22c8dc9e9ca9ad3c0800000000000000
+      internalID: -4333981499389015006
       vertices: []
       indices: 
       edges: []
@@ -138,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 480c5a1e216e6db43a392739a9e5ab2f
+    spriteID: 3a0a917696d8d4742aaa7e2a1db7c715
     internalID: 0
     vertices: []
     indices: 
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Piyon_0: 1856713639428680103
+      HexTile_Blocked_01_0: -4333981499389015006
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -49,7 +49,8 @@
 - Each valid click is intended to activate one neighboring tile, consume one move, and immediately move Larry forward by one step.
 - Start and goal are placed on opposite outer edges of the prototype board to support movement and puzzle-flow testing.
 - The current prototype already treats goal reach as a win and zero remaining moves as a fail state.
-- Real Larry/start/goal/path art is integrated; blocked art is still pending.
+- Real Larry/start/goal/path art is integrated, and blocked tiles now support multiple visual variants.
+- The current tinting rule is minimal: only inactive and highlighted tiles receive color filtering; authored active/start/goal/blocked art renders in its original colors.
 
 ## 6. HUD Design
 
@@ -93,7 +94,8 @@
 - `LevelLoader` holds an ordered level list for session-based progression; `LoadNextLevel()` advances to the next asset without reloading the scene.
 - The HUD level label reads from loaded level data; the win overlay shows a `Next Level` button if a next level exists in the ordered list.
 - Reset and fail always restart the currently active session level.
+- `LevelData` cell overrides can now drive both path-art variants and blocked-art variants.
 
 <environment_details>
-Current time: 2026-04-11T18:17:41+03:00
+Current time: 2026-04-11T21:40:35+03:00
 </environment_details>

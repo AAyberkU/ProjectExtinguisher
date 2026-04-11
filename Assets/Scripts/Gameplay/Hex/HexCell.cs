@@ -25,10 +25,6 @@ namespace ProjectExtinguisher.Gameplay.Hex
 
         [Header("Visual Colors")]
         [SerializeField] private Color inactiveColor = new(0.45f, 0.48f, 0.5f, 1f);
-        [SerializeField] private Color activeColor = new(0.95f, 0.97f, 1f, 1f);
-        [SerializeField] private Color blockedColor = new(0.72f, 0.4f, 0.4f, 1f);
-        [SerializeField] private Color startColor = new(0.35f, 0.82f, 0.45f, 1f);
-        [SerializeField] private Color goalColor = new(0.95f, 0.72f, 0.22f, 1f);
         [SerializeField] private Color highlightColor = new(0.35f, 0.85f, 1f, 1f);
 
         public Vector2Int GridIndex => gridIndex;
@@ -215,22 +211,17 @@ namespace ProjectExtinguisher.Gameplay.Hex
                 return highlightColor;
             }
 
-            if (isStart)
-            {
-                return startColor;
-            }
-
-            if (isGoal)
-            {
-                return goalColor;
-            }
-
             if (!isWalkable)
             {
-                return blockedColor;
+                return Color.white;
             }
 
-            return isActive ? activeColor : inactiveColor;
+            if (!isActive && !isStart)
+            {
+                return inactiveColor;
+            }
+
+            return Color.white;
         }
 
         private string BuildStateSummary()
