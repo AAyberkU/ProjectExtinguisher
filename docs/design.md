@@ -76,6 +76,21 @@
 - Hex-corner motif on panels where possible.
 - Canvas render mode: Screen Space – Overlay; `GraphicRaycaster` disabled so HUD does not intercept gameplay clicks.
 
+## 7. Level Structure
+
+- Use a single `GameplayScene` for all levels.
+- Levels should be defined as separate data assets rather than separate scenes.
+- The board stays the same 61-cell layout across all levels.
+- Each level data asset should define at minimum:
+  - level name / number
+  - move limit
+  - start cell coordinate
+  - goal cell coordinate
+  - blocked cell coordinates
+  - optional path-art variant assignments
+- A future `LevelLoader` should read the selected level data and configure the existing gameplay scene at runtime.
+- The HUD level label should eventually read from this level data.
+
 <environment_details>
-Current time: 2026-04-11T02:04:36+03:00
+Current time: 2026-04-11T15:53:30+03:00
 </environment_details>
