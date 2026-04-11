@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: f2d096c404c0fa44faca555c4eab2594
+guid: e8e1e58a5380d7c4883d0ae8d96d0368
 TextureImporter:
   internalIDToNameTable:
   - first:
@@ -8,6 +8,9 @@ TextureImporter:
   - first:
       213: -2547540560935805122
     second: "Aminog\u0306ludefne_1"
+  - first:
+      213: -1069728368845543814
+    second: "Aminog\u0306ludefne_2"
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -116,23 +119,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: "Aminog\u0306ludefne_1"
+      name: "Aminog\u0306ludefne_0"
       rect:
         serializedVersion: 2
-        x: 3249
-        y: 1299
-        width: 998
-        height: 1314
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
+        x: 1553
+        y: 1269
+        width: 1184
+        height: 1150
+      alignment: 9
+      pivot: {x: 0.41709673, y: 0.50087094}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e3f95867b5155acd0800000000000000
-      internalID: -2547540560935805122
+      spriteID: 0761e52b2b75a4c90800000000000000
+      internalID: -7184833830507899280
       vertices: []
       indices: 
       edges: []
@@ -141,7 +144,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 421e99470fa5b1d41b3d0ff329af4a07
+    spriteID: 60af8b0c1b9c4d94bbc6314f0dcfe82e
     internalID: 0
     vertices: []
     indices: 
@@ -153,6 +156,7 @@ TextureImporter:
     nameFileIdTable:
       "Aminog\u0306ludefne_0": -7184833830507899280
       "Aminog\u0306ludefne_1": -2547540560935805122
+      "Aminog\u0306ludefne_2": -1069728368845543814
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
