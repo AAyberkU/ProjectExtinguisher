@@ -33,9 +33,9 @@
 - Reset: Running out of moves requires the player to restart the level.
 - Current Fail Rule: If the final available move is spent without reaching the goal, the run is lost and must be reset.
 
-## 4. Technical Specifications (Initial)
+## 4. Technical Specifications (Current)
 
-- Grid Logic: Flat-top axial hex coordinates (`q`, `r`) are now the working prototype standard.
+- Grid Logic: Pointy-top axial hex coordinates (`q`, `r`) are the working board standard.
 - State Management:
   - Pre-Game: Level setup, moves initialized.
   - Active Play: Player activates neighboring tiles while Larry advances step by step.
@@ -43,12 +43,13 @@
 
 ## 5. Current Prototype Decisions
 
-- Current gameplay scene uses a large regular hex board with 5 cells per outer side (61 total cells).
+- Current gameplay scene uses a large regular pointy-top hex board with 5 cells per outer side (61 total cells).
 - Scene authoring currently relies on prefab-based `HexCell` instances registered under a central `HexGridManager`.
 - The current direction is step-based play rather than separate planning and execution phases.
 - Each valid click is intended to activate one neighboring tile, consume one move, and immediately move Larry forward by one step.
 - Start and goal are placed on opposite outer edges of the prototype board to support movement and puzzle-flow testing.
 - The current prototype already treats goal reach as a win and zero remaining moves as a fail state.
+- Real Larry/start/goal/path art is integrated; blocked art is still pending.
 
 ## 6. HUD Design
 
@@ -80,7 +81,7 @@
 
 - Use a single `GameplayScene` for all levels.
 - Levels should be defined as separate data assets rather than separate scenes.
-- The board stays the same 61-cell layout across all levels.
+- The board stays the same 61-cell pointy-top layout across all levels.
 - Each level data asset should define at minimum:
   - level name / number
   - move limit
@@ -88,9 +89,9 @@
   - goal cell coordinate
   - blocked cell coordinates
   - optional path-art variant assignments
-- A future `LevelLoader` should read the selected level data and configure the existing gameplay scene at runtime.
-- The HUD level label should eventually read from this level data.
+- `LevelLoader` now reads the selected level data and configures the existing gameplay scene at runtime.
+- The HUD level label now reads from loaded level data.
 
 <environment_details>
-Current time: 2026-04-11T15:53:30+03:00
+Current time: 2026-04-11T17:20:48+03:00
 </environment_details>
