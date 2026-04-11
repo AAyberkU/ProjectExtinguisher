@@ -3880,6 +3880,7 @@ MonoBehaviour:
   orderedLevels:
   - {fileID: 11400000, guid: 237110c7bd04d5e43a9254020a96657c, type: 2}
   - {fileID: 11400000, guid: 2d3160dd12baee84991a497b09ea9444, type: 2}
+  - {fileID: 11400000, guid: 7e0e32f3d1a4450cb38d18af2baafb2c, type: 2}
   applySelectedLevelOnStart: 1
   defaultInitialActiveState: 0
   autoCaptureVisualPalette: 1
@@ -3887,6 +3888,7 @@ MonoBehaviour:
   startSprite: {fileID: -3909223923928814340, guid: a126c5df3e9b285468a3f1d453568441, type: 3}
   goalSprite: {fileID: -728773534180308246, guid: 7197c9867e2139346975f8b72e91faf3, type: 3}
   blockedSprite: {fileID: -347702476747834141, guid: fbf467827fe5902499e54594efade730, type: 3}
+  catapultSprite: {fileID: -8250205929016015008, guid: 1a0f152144a23f5429d368ae6065e9c7, type: 3}
   blockedVariantSprites:
   - {fileID: -4333981499389015006, guid: 0c673883410a0d040ab4338e2839910b, type: 3}
   - {fileID: -7184833830507899280, guid: e8e1e58a5380d7c4883d0ae8d96d0368, type: 3}

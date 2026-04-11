@@ -31,6 +31,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
         [SerializeField] private Sprite startSprite;
         [SerializeField] private Sprite goalSprite;
         [SerializeField] private Sprite blockedSprite;
+        [SerializeField] private Sprite catapultSprite;
         [SerializeField] private List<Sprite> blockedVariantSprites = new();
         [SerializeField] private List<Sprite> pathVariantSprites = new();
 
@@ -225,7 +226,12 @@ namespace ProjectExtinguisher.Gameplay.Levels
                     blockedSprite = cell.CurrentSprite;
                 }
 
-                if (defaultPathSprite == null && cell.IsWalkable && !cell.IsStart && !cell.IsGoal)
+                if (catapultSprite == null && cell.IsCatapult)
+                {
+                    catapultSprite = cell.CurrentSprite;
+                }
+
+                if (defaultPathSprite == null && cell.IsWalkable && !cell.IsStart && !cell.IsGoal && !cell.IsCatapult)
                 {
                     defaultPathSprite = cell.CurrentSprite;
                 }
@@ -239,6 +245,8 @@ namespace ProjectExtinguisher.Gameplay.Levels
             bool isGoal = coordinate == level.GoalCell;
             bool active = level.DefaultInitialActiveState || defaultInitialActiveState;
             bool walkable = true;
+            bool isCatapult = false;
+            HexCell.CatapultDirection catapultDirection = HexCell.CatapultDirection.E;
             bool useVisualVariant = false;
             int visualVariantIndex = -1;
 
@@ -246,6 +254,8 @@ namespace ProjectExtinguisher.Gameplay.Levels
             {
                 walkable = !overrideState.blocked;
                 active = overrideState.initiallyActive;
+                isCatapult = overrideState.catapult;
+                catapultDirection = overrideState.catapultDirection;
                 useVisualVariant = overrideState.usePathVariant;
                 visualVariantIndex = overrideState.pathVariantIndex;
             }
@@ -260,15 +270,25 @@ namespace ProjectExtinguisher.Gameplay.Levels
                 walkable = true;
             }
 
+            cell.ConfigureCatapult(isCatapult, catapultDirection);
             cell.ApplyState(active, walkable, isStart, isGoal, false);
-            ApplyCellSprite(cell, walkable, isStart, isGoal, useVisualVariant, visualVariantIndex);
+            ApplyCellSprite(cell, walkable, isStart, isGoal, isCatapult, useVisualVariant, visualVariantIndex);
         }
 
-        private void ApplyCellSprite(HexCell cell, bool walkable, bool isStart, bool isGoal, bool useVisualVariant, int visualVariantIndex)
+        private void ApplyCellSprite(HexCell cell, bool walkable, bool isStart, bool isGoal, bool isCatapult, bool useVisualVariant, int visualVariantIndex)
         {
+            if (cell == null)
+            {
+                return;
+            }
+
             Sprite sprite = null;
 
-            if (!walkable)
+            if (isCatapult)
+            {
+                sprite = catapultSprite;
+            }
+            else if (!walkable)
             {
                 if (useVisualVariant && visualVariantIndex >= 0 && visualVariantIndex < blockedVariantSprites.Count)
                 {

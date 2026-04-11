@@ -4,6 +4,16 @@ namespace ProjectExtinguisher.Gameplay.Hex
 {
     public sealed class HexCell : MonoBehaviour
     {
+        public enum CatapultDirection
+        {
+            E = 0,
+            NE = 1,
+            NW = 2,
+            W = 3,
+            SW = 4,
+            SE = 5
+        }
+
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs;
 
@@ -16,6 +26,11 @@ namespace ProjectExtinguisher.Gameplay.Hex
         [SerializeField] private bool isStart;
         [SerializeField] private bool isGoal;
         [SerializeField] private bool isHighlighted;
+
+        [Header("Catapult")]
+        [SerializeField] private bool isCatapult;
+        [SerializeField] private CatapultDirection catapultDirection;
+        [SerializeField] [Min(1)] private int catapultLaunchDistance = 2;
 
         [Header("Visual References")]
         [SerializeField] private SpriteRenderer spriteRenderer;
@@ -35,6 +50,9 @@ namespace ProjectExtinguisher.Gameplay.Hex
         public bool IsStart => isStart;
         public bool IsGoal => isGoal;
         public bool IsHighlighted => isHighlighted;
+        public bool IsCatapult => isCatapult;
+        public CatapultDirection LaunchDirection => catapultDirection;
+        public int CatapultLaunchDistance => Mathf.Max(1, catapultLaunchDistance);
         public SpriteRenderer SpriteRenderer => spriteRenderer;
         public Collider2D CellCollider => cellCollider;
         public Sprite CurrentSprite => spriteRenderer == null ? null : spriteRenderer.sprite;
@@ -177,6 +195,45 @@ namespace ProjectExtinguisher.Gameplay.Hex
             Log($"Visual sprite changed on {gridIndex}.");
         }
 
+        public void ConfigureCatapult(bool value, CatapultDirection direction, int launchDistance = 2)
+        {
+            int clampedLaunchDistance = Mathf.Max(1, launchDistance);
+            bool changed = isCatapult != value
+                || catapultDirection != direction
+                || catapultLaunchDistance != clampedLaunchDistance;
+
+            if (!changed)
+            {
+                return;
+            }
+
+            isCatapult = value;
+            catapultDirection = direction;
+            catapultLaunchDistance = clampedLaunchDistance;
+
+            RefreshVisuals();
+            Log($"Catapult state changed to enabled={isCatapult}, direction={catapultDirection}, launchDistance={catapultLaunchDistance} for {gridIndex}.");
+        }
+
+        public Vector2Int GetCatapultOffset()
+        {
+            return GetAxialOffset(catapultDirection);
+        }
+
+        public static Vector2Int GetAxialOffset(CatapultDirection direction)
+        {
+            return direction switch
+            {
+                CatapultDirection.E => new Vector2Int(1, 0),
+                CatapultDirection.NE => new Vector2Int(1, -1),
+                CatapultDirection.NW => new Vector2Int(0, -1),
+                CatapultDirection.W => new Vector2Int(-1, 0),
+                CatapultDirection.SW => new Vector2Int(-1, 1),
+                CatapultDirection.SE => new Vector2Int(0, 1),
+                _ => Vector2Int.zero
+            };
+        }
+
         [ContextMenu("Refresh Visuals")]
         public void RefreshVisuals()
         {
@@ -211,6 +268,11 @@ namespace ProjectExtinguisher.Gameplay.Hex
                 return highlightColor;
             }
 
+            if (isCatapult)
+            {
+                return Color.white;
+            }
+
             if (!isWalkable)
             {
                 return Color.white;
@@ -226,7 +288,7 @@ namespace ProjectExtinguisher.Gameplay.Hex
 
         private string BuildStateSummary()
         {
-            return $"[active={isActive}, walkable={isWalkable}, start={isStart}, goal={isGoal}, highlighted={isHighlighted}]";
+            return $"[active={isActive}, walkable={isWalkable}, start={isStart}, goal={isGoal}, highlighted={isHighlighted}, catapult={isCatapult}, direction={catapultDirection}, launchDistance={CatapultLaunchDistance}]";
         }
 
         private void Log(string message)

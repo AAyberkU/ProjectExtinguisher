@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ProjectExtinguisher.Gameplay.Hex;
 using UnityEngine;
 
 namespace ProjectExtinguisher.Gameplay.Levels
@@ -13,6 +14,8 @@ namespace ProjectExtinguisher.Gameplay.Levels
             public Vector2Int coordinate;
             public bool blocked;
             public bool initiallyActive;
+            public bool catapult;
+            public HexCell.CatapultDirection catapultDirection;
             public bool usePathVariant;
             public int pathVariantIndex;
         }

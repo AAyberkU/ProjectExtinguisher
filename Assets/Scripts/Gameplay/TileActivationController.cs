@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using ProjectExtinguisher.Gameplay.Hex;
 using ProjectExtinguisher.Gameplay.Larry;
@@ -43,18 +44,12 @@ namespace ProjectExtinguisher.Gameplay
         [SerializeField] private bool allowMouseActivation = true;
         [SerializeField] private bool allowKeyboardReset = true;
 
-        private static readonly Vector2Int[] AxialNeighborDirections =
-        {
-            new(1, 0),
-            new(1, -1),
-            new(0, -1),
-            new(-1, 0),
-            new(-1, 1),
-            new(0, 1)
-        };
-
         private readonly List<CellPlanningSnapshot> initialSnapshots = new();
         private bool hasCapturedInitialState;
+        private Coroutine movementResolutionRoutine;
+
+        [Header("Movement Effects")]
+        [SerializeField] [Min(1)] private int maxCatapultChainCount = 8;
 
         public GameState CurrentGameState => currentGameState;
         public bool HasWon => hasWon;
@@ -111,6 +106,7 @@ namespace ProjectExtinguisher.Gameplay
 
         public void ApplyLoadedLevelSetup(int moveLimit)
         {
+            StopMovementResolution();
             planningMoveLimit = Mathf.Max(0, moveLimit);
             planningMovesRemaining = planningMoveLimit;
             hasWon = false;
@@ -179,6 +175,8 @@ namespace ProjectExtinguisher.Gameplay
         [ContextMenu("Reset Planning State")]
         public void ResetPlanningState()
         {
+            StopMovementResolution();
+
             if (!hasCapturedInitialState)
             {
                 CaptureInitialPlanningState();
@@ -252,7 +250,7 @@ namespace ProjectExtinguisher.Gameplay
                 return;
             }
 
-            if (hasWon || hasLost || currentGameState != GameState.Planning)
+            if (hasWon || hasLost || currentGameState != GameState.Planning || movementResolutionRoutine != null)
             {
                 return;
             }
@@ -332,7 +330,7 @@ namespace ProjectExtinguisher.Gameplay
                 return;
             }
 
-            if (larryController != null && larryController.IsMoving)
+            if (movementResolutionRoutine != null || (larryController != null && larryController.IsMoving))
             {
                 Log($"Ignored click on '{cell.name}' at {cell.GridIndex} because Larry is already mid-hop.");
                 return;
@@ -347,17 +345,99 @@ namespace ProjectExtinguisher.Gameplay
             cell.SetActive(true);
             planningMovesRemaining--;
 
-            Log($"Activated '{cell.name}' at {cell.GridIndex}. Remaining moves: {planningMovesRemaining}. Larry moved to {DescribeCell(GetLarryCurrentCell())}.");
+            Log($"Activated '{cell.name}' at {cell.GridIndex}. Remaining moves: {planningMovesRemaining}. Larry started moving to {DescribeCell(cell)}.");
+            movementResolutionRoutine = StartCoroutine(ResolveMovementSequence(cell));
+        }
 
-            if (cell.IsGoal)
+        private IEnumerator ResolveMovementSequence(HexCell landedCell)
+        {
+            yield return WaitForLarryHopToFinish();
+
+            HexCell finalCell = landedCell;
+            int chainCount = 0;
+
+            while (finalCell != null && finalCell.IsCatapult && chainCount < maxCatapultChainCount)
             {
-                EnterWinState(cell);
+                if (!TryResolveCatapultDestination(finalCell, out HexCell launchDestination))
+                {
+                    break;
+                }
+
+                if (!launchDestination.IsActive)
+                {
+                    launchDestination.SetActive(true);
+                }
+
+                if (larryController == null || !larryController.MoveToCell(launchDestination))
+                {
+                    LogWarning($"Catapult launch from {DescribeCell(finalCell)} to {DescribeCell(launchDestination)} could not start.");
+                    break;
+                }
+
+                chainCount++;
+                Log($"Catapult chain {chainCount} launched Larry from {DescribeCell(finalCell)} to {DescribeCell(launchDestination)}.");
+
+                yield return WaitForLarryHopToFinish();
+                finalCell = launchDestination;
+            }
+
+            if (finalCell != null && finalCell.IsCatapult && chainCount >= maxCatapultChainCount)
+            {
+                LogWarning($"Stopped catapult resolution after reaching chain limit {maxCatapultChainCount} at {DescribeCell(finalCell)}.");
+            }
+
+            movementResolutionRoutine = null;
+            FinalizeMoveOutcome(finalCell);
+        }
+
+        private IEnumerator WaitForLarryHopToFinish()
+        {
+            while (larryController != null && larryController.IsMoving)
+            {
+                yield return null;
+            }
+        }
+
+        private bool TryResolveCatapultDestination(HexCell catapultCell, out HexCell destinationCell)
+        {
+            destinationCell = null;
+
+            if (catapultCell == null || !catapultCell.IsCatapult)
+            {
+                return false;
+            }
+
+            Vector2Int landingIndex = catapultCell.GridIndex + (catapultCell.GetCatapultOffset() * catapultCell.CatapultLaunchDistance);
+            if (gridManager == null || !gridManager.TryGetCell(landingIndex, out destinationCell) || destinationCell == null)
+            {
+                Log($"Catapult at {DescribeCell(catapultCell)} could not launch Larry because landing cell {landingIndex} is off-board.");
+                destinationCell = null;
+                return false;
+            }
+
+            if (!destinationCell.IsWalkable)
+            {
+                Log($"Catapult at {DescribeCell(catapultCell)} could not launch Larry because landing cell {DescribeCell(destinationCell)} is blocked.");
+                destinationCell = null;
+                return false;
+            }
+
+            return true;
+        }
+
+        private void FinalizeMoveOutcome(HexCell finalCell)
+        {
+            Log($"Movement resolved on {DescribeCell(finalCell)}. Remaining moves: {planningMovesRemaining}.");
+
+            if (finalCell != null && finalCell.IsGoal)
+            {
+                EnterWinState(finalCell);
                 return;
             }
 
             if (planningMovesRemaining == 0)
             {
-                EnterFailState(cell);
+                EnterFailState(finalCell);
             }
         }
 
@@ -438,9 +518,9 @@ namespace ProjectExtinguisher.Gameplay
             Vector2Int originIndex = origin.GridIndex;
             Vector2Int candidateIndex = candidate.GridIndex;
 
-            for (int index = 0; index < AxialNeighborDirections.Length; index++)
+            for (int index = 0; index < 6; index++)
             {
-                if (originIndex + AxialNeighborDirections[index] == candidateIndex)
+                if (originIndex + HexCell.GetAxialOffset((HexCell.CatapultDirection)index) == candidateIndex)
                 {
                     return true;
                 }
@@ -457,6 +537,17 @@ namespace ProjectExtinguisher.Gameplay
         private void SyncPlanningMovesForEditor()
         {
             planningMovesRemaining = planningMoveLimit;
+        }
+
+        private void StopMovementResolution()
+        {
+            if (movementResolutionRoutine == null)
+            {
+                return;
+            }
+
+            StopCoroutine(movementResolutionRoutine);
+            movementResolutionRoutine = null;
         }
 
         private void Log(string message)
