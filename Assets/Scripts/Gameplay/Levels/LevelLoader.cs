@@ -34,6 +34,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
         [SerializeField] private Sprite catapultSprite;
         [SerializeField] private Sprite healthSprite;
         [SerializeField] private List<Sprite> blockedVariantSprites = new();
+        [SerializeField] private List<Sprite> catapultVariantSprites = new();
         [SerializeField] private List<Sprite> pathVariantSprites = new();
 
         private readonly Dictionary<Vector2Int, LevelData.CellLevelState> stateByCoordinate = new();
@@ -283,10 +284,10 @@ namespace ProjectExtinguisher.Gameplay.Levels
             cell.ConfigureCatapult(isCatapult, catapultDirection);
             cell.ConfigureMoveBonus(isMoveBonus, moveBonusAmount);
             cell.ApplyState(active, walkable, isStart, isGoal, false);
-            ApplyCellSprite(cell, walkable, isStart, isGoal, isCatapult, isMoveBonus, useVisualVariant, visualVariantIndex);
+            ApplyCellSprite(cell, walkable, isStart, isGoal, isCatapult, catapultDirection, isMoveBonus, useVisualVariant, visualVariantIndex);
         }
 
-        private void ApplyCellSprite(HexCell cell, bool walkable, bool isStart, bool isGoal, bool isCatapult, bool isMoveBonus, bool useVisualVariant, int visualVariantIndex)
+        private void ApplyCellSprite(HexCell cell, bool walkable, bool isStart, bool isGoal, bool isCatapult, HexCell.CatapultDirection catapultDirection, bool isMoveBonus, bool useVisualVariant, int visualVariantIndex)
         {
             if (cell == null)
             {
@@ -297,7 +298,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
 
             if (isCatapult)
             {
-                sprite = catapultSprite;
+                sprite = GetCatapultSprite(catapultDirection);
             }
             else if (isMoveBonus)
             {
@@ -339,6 +340,21 @@ namespace ProjectExtinguisher.Gameplay.Levels
             {
                 cell.SetVisualSprite(sprite);
             }
+        }
+
+        private Sprite GetCatapultSprite(HexCell.CatapultDirection direction)
+        {
+            int variantIndex = (int)direction;
+            if (variantIndex >= 0 && variantIndex < catapultVariantSprites.Count)
+            {
+                Sprite variantSprite = catapultVariantSprites[variantIndex];
+                if (variantSprite != null)
+                {
+                    return variantSprite;
+                }
+            }
+
+            return catapultSprite;
         }
 
         private void BuildCellStateLookup(LevelData level)

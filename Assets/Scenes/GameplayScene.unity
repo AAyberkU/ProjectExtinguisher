@@ -3896,6 +3896,13 @@ MonoBehaviour:
   - {fileID: -2868019670034099769, guid: b97efda68ab38b84db23c1f6d040f86c, type: 3}
   - {fileID: -7184833830507899280, guid: e8e1e58a5380d7c4883d0ae8d96d0368, type: 3}
   - {fileID: -4875569321281796739, guid: b9b5d07b02699764d988f4c45f4b0860, type: 3}
+  catapultVariantSprites:
+  - {fileID: 3842018695705076438, guid: c8f16dd986b75c4408088d59d1c6bed7, type: 3}
+  - {fileID: 3254245671566714605, guid: c7e0188468580f640ac372ab51883a73, type: 3}
+  - {fileID: 2436689576485346197, guid: 4f6efdc8fb8021140afc647ac0b409b0, type: 3}
+  - {fileID: -8250205929016015008, guid: 1a0f152144a23f5429d368ae6065e9c7, type: 3}
+  - {fileID: -306436974536269106, guid: 30a3089e2fe4ffd49b60f9eef0274e1e, type: 3}
+  - {fileID: 2436689576485346197, guid: 4f6efdc8fb8021140afc647ac0b409b0, type: 3}
   pathVariantSprites:
   - {fileID: -347702476747834141, guid: fbf467827fe5902499e54594efade730, type: 3}
   - {fileID: 2436689576485346197, guid: 4f6efdc8fb8021140afc647ac0b409b0, type: 3}
