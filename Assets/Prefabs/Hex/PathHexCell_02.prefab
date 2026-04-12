@@ -122,6 +122,7 @@ MonoBehaviour:
   cellCollider: {fileID: 6924348301859563150}
   driveSpriteColor: 1
   driveColliderEnabledState: 0
+  blockerVariantSortingIndex: -1
   inactiveColor: {r: 0.45, g: 0.48, b: 0.5, a: 1}
   highlightColor: {r: 0.35, g: 0.85, b: 1, a: 1}
 --- !u!60 &6924348301859563150

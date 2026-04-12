@@ -8,6 +8,8 @@ namespace ProjectExtinguisher.Gameplay.Larry
     public sealed class LarryController : MonoBehaviour
     {
         private const int LarrySortingOrder = 10;
+        private const int CurrentTileShadowSortingOrder = LarrySortingOrder - 2;
+        private const int CurrentTileHoverSortingOrder = LarrySortingOrder - 1;
 
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs;
@@ -37,6 +39,17 @@ namespace ProjectExtinguisher.Gameplay.Larry
         [SerializeField] [Range(0f, 1f)] private float jumpVolume = 1f;
         [SerializeField] private AudioSource jumpAudioSource;
 
+        [Header("Current Tile Hover")]
+        [SerializeField] private bool enableCurrentTileHover = true;
+        [SerializeField] [Min(0f)] private float currentTileHoverLift = 0.08f;
+        [SerializeField] [Min(0.01f)] private float currentTileHoverScale = 1.04f;
+        [SerializeField] [Min(0f)] private float currentTileHoverBobAmplitude = 0.02f;
+        [SerializeField] [Min(0f)] private float currentTileHoverBobSpeed = 2.4f;
+        [SerializeField] private Vector2 currentTileShadowOffset = new(0f, -0.05f);
+        [SerializeField] private Vector2 currentTileShadowScale = new(1f, 0.9f);
+        [SerializeField] [Range(0f, 1f)] private float currentTileShadowAlpha = 0.22f;
+        [SerializeField] [Range(0f, 1f)] private float currentTileHoverAlpha = 0.96f;
+
         [Header("Settle")]
         [SerializeField] [Min(0f)] private float settleDuration = 0.1f;
         [SerializeField] [Range(0f, 0.3f)] private float landingSquash = 0.08f;
@@ -50,6 +63,9 @@ namespace ProjectExtinguisher.Gameplay.Larry
         private Coroutine moveRoutine;
         private Vector3 cachedVisualLocalScale = Vector3.one;
         private bool hasCachedVisualScale;
+        private Transform currentTileHoverRoot;
+        private SpriteRenderer currentTileShadowRenderer;
+        private SpriteRenderer currentTileHoverRenderer;
 
         public HexCell CurrentCell => currentCell;
         public bool IsMoving => moveRoutine != null;
@@ -68,9 +84,20 @@ namespace ProjectExtinguisher.Gameplay.Larry
             CaptureInitialState();
         }
 
+        private void LateUpdate()
+        {
+            UpdateCurrentTileHover();
+        }
+
         private void OnDisable()
         {
             StopActiveMove(snapToCurrentCell: true);
+            HideCurrentTileHover();
+        }
+
+        private void OnDestroy()
+        {
+            DestroyCurrentTileHoverRoot();
         }
 
         private void OnValidate()
@@ -78,6 +105,11 @@ namespace ProjectExtinguisher.Gameplay.Larry
             CacheReferences();
             RefreshVisualSorting();
             jumpVolume = Mathf.Clamp01(jumpVolume);
+            currentTileHoverScale = Mathf.Max(0.01f, currentTileHoverScale);
+            currentTileHoverBobAmplitude = Mathf.Max(0f, currentTileHoverBobAmplitude);
+            currentTileHoverBobSpeed = Mathf.Max(0f, currentTileHoverBobSpeed);
+            currentTileShadowAlpha = Mathf.Clamp01(currentTileShadowAlpha);
+            currentTileHoverAlpha = Mathf.Clamp01(currentTileHoverAlpha);
 
             if (Application.isPlaying)
             {
@@ -149,6 +181,11 @@ namespace ProjectExtinguisher.Gameplay.Larry
             if (visualSpriteRenderer != null)
             {
                 visualSpriteRenderer.enabled = visible;
+            }
+
+            if (!visible)
+            {
+                HideCurrentTileHover();
             }
         }
 
@@ -266,6 +303,187 @@ namespace ProjectExtinguisher.Gameplay.Larry
             }
 
             jumpAudioSource.PlayOneShot(jumpClip, jumpVolume);
+        }
+
+        private void UpdateCurrentTileHover()
+        {
+            if (!enableCurrentTileHover)
+            {
+                HideCurrentTileHover();
+                return;
+            }
+
+            if (!CanShowCurrentTileHover())
+            {
+                HideCurrentTileHover();
+                return;
+            }
+
+            EnsureCurrentTileHoverObjects();
+            if (currentTileShadowRenderer == null || currentTileHoverRenderer == null)
+            {
+                return;
+            }
+
+            AttachCurrentTileHoverToCell(currentCell.transform);
+
+            SpriteRenderer cellRenderer = currentCell.SpriteRenderer;
+            if (cellRenderer == null || !cellRenderer.enabled || currentCell.CurrentSprite == null)
+            {
+                HideCurrentTileHover();
+                return;
+            }
+
+            ConfigureCurrentTileHoverRenderer(currentTileShadowRenderer, cellRenderer, CurrentTileShadowSortingOrder);
+            ConfigureCurrentTileHoverRenderer(currentTileHoverRenderer, cellRenderer, CurrentTileHoverSortingOrder);
+
+            float bobOffset = currentTileHoverBobAmplitude <= 0f || currentTileHoverBobSpeed <= 0f
+                ? 0f
+                : Mathf.Sin(Time.time * currentTileHoverBobSpeed * Mathf.PI * 2f) * currentTileHoverBobAmplitude;
+
+            currentTileShadowRenderer.transform.localPosition = new Vector3(currentTileShadowOffset.x, currentTileShadowOffset.y, 0f);
+            currentTileShadowRenderer.transform.localRotation = Quaternion.identity;
+            currentTileShadowRenderer.transform.localScale = new Vector3(
+                Mathf.Max(0.01f, currentTileShadowScale.x),
+                Mathf.Max(0.01f, currentTileShadowScale.y),
+                1f);
+            currentTileShadowRenderer.color = new Color(0f, 0f, 0f, currentTileShadowAlpha);
+
+            currentTileHoverRenderer.transform.localPosition = new Vector3(0f, currentTileHoverLift + bobOffset, 0f);
+            currentTileHoverRenderer.transform.localRotation = Quaternion.identity;
+            currentTileHoverRenderer.transform.localScale = Vector3.one * Mathf.Max(0.01f, currentTileHoverScale);
+
+            Color hoverColor = cellRenderer.color;
+            hoverColor.a *= currentTileHoverAlpha;
+            currentTileHoverRenderer.color = hoverColor;
+
+            currentTileShadowRenderer.enabled = true;
+            currentTileHoverRenderer.enabled = true;
+        }
+
+        private bool CanShowCurrentTileHover()
+        {
+            if (!Application.isPlaying || currentCell == null || IsMoving)
+            {
+                return false;
+            }
+
+            if (visualSpriteRenderer == null || !visualSpriteRenderer.enabled)
+            {
+                return false;
+            }
+
+            return currentCell.SpriteRenderer != null && currentCell.SpriteRenderer.enabled;
+        }
+
+        private void EnsureCurrentTileHoverObjects()
+        {
+            if (currentTileHoverRoot != null && currentTileShadowRenderer != null && currentTileHoverRenderer != null)
+            {
+                return;
+            }
+
+            Transform parent = gridManager != null ? gridManager.transform : transform.parent;
+
+            if (currentTileHoverRoot == null)
+            {
+                GameObject rootObject = new GameObject("Larry Current Tile Hover");
+                currentTileHoverRoot = rootObject.transform;
+                currentTileHoverRoot.SetParent(parent, false);
+            }
+
+            if (currentTileShadowRenderer == null)
+            {
+                currentTileShadowRenderer = CreateCurrentTileHoverRenderer("Shadow");
+            }
+
+            if (currentTileHoverRenderer == null)
+            {
+                currentTileHoverRenderer = CreateCurrentTileHoverRenderer("Hover");
+            }
+
+            HideCurrentTileHover();
+        }
+
+        private void AttachCurrentTileHoverToCell(Transform cellTransform)
+        {
+            if (currentTileHoverRoot == null || cellTransform == null)
+            {
+                return;
+            }
+
+            if (currentTileHoverRoot.parent != cellTransform)
+            {
+                currentTileHoverRoot.SetParent(cellTransform, false);
+            }
+
+            currentTileHoverRoot.localPosition = Vector3.zero;
+            currentTileHoverRoot.localRotation = Quaternion.identity;
+            currentTileHoverRoot.localScale = Vector3.one;
+        }
+
+        private SpriteRenderer CreateCurrentTileHoverRenderer(string nameSuffix)
+        {
+            if (currentTileHoverRoot == null)
+            {
+                return null;
+            }
+
+            GameObject rendererObject = new GameObject($"Current Tile {nameSuffix}");
+            rendererObject.transform.SetParent(currentTileHoverRoot, false);
+
+            SpriteRenderer renderer = rendererObject.AddComponent<SpriteRenderer>();
+            renderer.enabled = false;
+            return renderer;
+        }
+
+        private void ConfigureCurrentTileHoverRenderer(SpriteRenderer renderer, SpriteRenderer sourceRenderer, int sortingOrder)
+        {
+            if (renderer == null || sourceRenderer == null)
+            {
+                return;
+            }
+
+            renderer.sprite = sourceRenderer.sprite;
+            renderer.flipX = sourceRenderer.flipX;
+            renderer.flipY = sourceRenderer.flipY;
+            renderer.drawMode = sourceRenderer.drawMode;
+            renderer.sharedMaterial = sourceRenderer.sharedMaterial;
+            renderer.sortingLayerID = sourceRenderer.sortingLayerID;
+            renderer.sortingOrder = sortingOrder;
+            renderer.maskInteraction = sourceRenderer.maskInteraction;
+            renderer.spriteSortPoint = sourceRenderer.spriteSortPoint;
+
+            if (sourceRenderer.drawMode != SpriteDrawMode.Simple)
+            {
+                renderer.size = sourceRenderer.size;
+            }
+        }
+
+        private void HideCurrentTileHover()
+        {
+            if (currentTileShadowRenderer != null)
+            {
+                currentTileShadowRenderer.enabled = false;
+            }
+
+            if (currentTileHoverRenderer != null)
+            {
+                currentTileHoverRenderer.enabled = false;
+            }
+        }
+
+        private void DestroyCurrentTileHoverRoot()
+        {
+            if (currentTileHoverRoot == null)
+            {
+                return;
+            }
+
+            Destroy(currentTileHoverRoot.gameObject);
+            currentTileHoverRoot = null;
+            currentTileShadowRenderer = null;
+            currentTileHoverRenderer = null;
         }
 
         private HexCell ResolveInitialCell()
