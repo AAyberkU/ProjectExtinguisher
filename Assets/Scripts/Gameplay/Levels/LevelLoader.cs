@@ -150,11 +150,6 @@ namespace ProjectExtinguisher.Gameplay.Levels
 
             LevelData startupLevel = pendingStartupLevel;
 
-            if (tileActivationController != null)
-            {
-                tileActivationController.SetBackgroundMusicSuppressed(false);
-            }
-
             if (backgroundPresentation != null)
             {
                 backgroundPresentation.SetGameplayState();
@@ -236,7 +231,6 @@ namespace ProjectExtinguisher.Gameplay.Levels
             {
                 tileActivationController.SetGameState(GameState.PreGame);
                 tileActivationController.SetInputLocked(true);
-                tileActivationController.SetBackgroundMusicSuppressed(true);
             }
 
             if (backgroundPresentation != null)

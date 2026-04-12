@@ -88,7 +88,6 @@ namespace ProjectExtinguisher.Gameplay
         {
             CacheReferences();
             EnsureAudioSources();
-            ApplyStartupBackgroundMusicSuppression();
             SyncPlanningMovesForEditor();
             CaptureInitialPlanningState();
             RefreshBackgroundMusic();

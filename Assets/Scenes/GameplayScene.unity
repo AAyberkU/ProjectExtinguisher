@@ -3761,8 +3761,8 @@ MonoBehaviour:
   requireLarryAdjacency: 1
   allowMouseActivation: 1
   allowKeyboardReset: 1
-  backgroundMusicClip: {fileID: 0}
-  backgroundMusicVolume: 1
+  backgroundMusicClip: {fileID: 8300000, guid: 08b86a158c9d3e440b8a4543dd1e6721, type: 3}
+  backgroundMusicVolume: 0.4
   catapultLaunchClip: {fileID: 8300000, guid: 982bdc5b72796184a8c2a40b80b9670f, type: 3}
   catapultLaunchVolume: 1
   levelCompleteClip: {fileID: 8300000, guid: 2c678799e8600244a9f76b326f55ffb4, type: 3}
@@ -4209,7 +4209,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80864ed7690436a498fa562dea55371d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ProjectExtinguisher.UI.BackgroundPresentationController
-  backgroundSprite: {fileID: -7443756053782179069, guid: 8ece86ebd44866948aeb34967369723c, type: 3}
+  backgroundSprite: {fileID: -7999507643032284708, guid: cd66d6d1a4f9fdf4397877e5ee9a8b39, type: 3}
   gameplayTint: {r: 1, g: 1, b: 1, a: 1}
   targetCamera: {fileID: 1944031184}
   menuOverlayColor: {r: 0, g: 0, b: 0, a: 0.45}
