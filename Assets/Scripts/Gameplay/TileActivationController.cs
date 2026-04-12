@@ -56,11 +56,14 @@ namespace ProjectExtinguisher.Gameplay
         [SerializeField] [Range(0f, 1f)] private float loseVolume = 1f;
         [SerializeField] private AudioClip restartClip;
         [SerializeField] [Range(0f, 1f)] private float restartVolume = 1f;
+        [SerializeField] private AudioClip healthTileClip;
+        [SerializeField] [Range(0f, 1f)] private float healthTileVolume = 1f;
         [SerializeField] private AudioSource musicAudioSource;
         [SerializeField] private AudioSource sfxAudioSource;
 
         private readonly List<CellPlanningSnapshot> initialSnapshots = new();
         private bool hasCapturedInitialState;
+        private bool inputLocked;
         private Coroutine movementResolutionRoutine;
 
         [Header("Movement Effects")]
@@ -71,6 +74,7 @@ namespace ProjectExtinguisher.Gameplay
         public bool HasLost => hasLost;
         public int PlanningMoveLimit => planningMoveLimit;
         public int PlanningMovesRemaining => planningMovesRemaining;
+        public bool IsInputLocked => inputLocked;
 
         private void Reset()
         {
@@ -96,6 +100,7 @@ namespace ProjectExtinguisher.Gameplay
             levelCompleteVolume = Mathf.Clamp01(levelCompleteVolume);
             loseVolume = Mathf.Clamp01(loseVolume);
             restartVolume = Mathf.Clamp01(restartVolume);
+            healthTileVolume = Mathf.Clamp01(healthTileVolume);
 
             if (!Application.isPlaying)
             {
@@ -137,6 +142,7 @@ namespace ProjectExtinguisher.Gameplay
             planningMovesRemaining = planningMoveLimit;
             hasWon = false;
             hasLost = false;
+            inputLocked = false;
             currentGameState = GameState.Planning;
 
             CaptureInitialPlanningState();
@@ -147,6 +153,11 @@ namespace ProjectExtinguisher.Gameplay
             }
 
             Log($"Applied loaded level setup with move limit {planningMoveLimit}.");
+        }
+
+        public void SetInputLocked(bool value)
+        {
+            inputLocked = value;
         }
 
         [ContextMenu("Capture Initial Planning State")]
@@ -257,7 +268,7 @@ namespace ProjectExtinguisher.Gameplay
 
         private void HandleResetInput()
         {
-            if (!allowKeyboardReset)
+            if (!allowKeyboardReset || inputLocked)
             {
                 return;
             }
@@ -274,7 +285,7 @@ namespace ProjectExtinguisher.Gameplay
 
         private void HandlePlanningClick()
         {
-            if (!allowMouseActivation)
+            if (!allowMouseActivation || inputLocked)
             {
                 return;
             }
@@ -451,6 +462,7 @@ namespace ProjectExtinguisher.Gameplay
             }
 
             planningMovesRemaining += bonusAmount;
+            PlayOneShotSfx(healthTileClip, healthTileVolume);
             Log($"Move bonus tile at {DescribeCell(landedCell)} granted {bonusAmount} move(s). Remaining moves: {planningMovesRemaining}.");
         }
 

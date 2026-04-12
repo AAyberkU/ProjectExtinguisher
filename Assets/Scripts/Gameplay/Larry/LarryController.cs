@@ -144,6 +144,14 @@ namespace ProjectExtinguisher.Gameplay.Larry
             return MoveToCell(targetCell, true);
         }
 
+        public void SetVisualVisible(bool visible)
+        {
+            if (visualSpriteRenderer != null)
+            {
+                visualSpriteRenderer.enabled = visible;
+            }
+        }
+
         public bool MoveToCell(HexCell targetCell, bool playJumpAudio)
         {
             if (!IsRegisteredGridCell(targetCell))

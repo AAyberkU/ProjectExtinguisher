@@ -1,8 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
 using ProjectExtinguisher.Gameplay.Hex;
 using ProjectExtinguisher.Gameplay.Larry;
 using ProjectExtinguisher.UI;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace ProjectExtinguisher.Gameplay.Levels
 {
@@ -25,6 +27,22 @@ namespace ProjectExtinguisher.Gameplay.Levels
         [SerializeField] private bool applySelectedLevelOnStart = true;
         [SerializeField] private bool defaultInitialActiveState;
 
+        [Header("Level Intro")]
+        [SerializeField] private bool playLevelIntroOnLoad = true;
+        [SerializeField] private Camera introCamera;
+        [FormerlySerializedAs("introDropHeight")]
+        [SerializeField] [Min(0f)] private float introOffscreenPadding = 2f;
+        [SerializeField] [Min(0f)] private float introLineDelay = 0.04f;
+        [FormerlySerializedAs("introFallDuration")]
+        [SerializeField] [Min(0.01f)] private float introBaseFallDuration = 0.22f;
+        [SerializeField] [Min(0.1f)] private float introSpeedMultiplier = 1f;
+        [SerializeField] private AudioClip introStartClip;
+        [SerializeField] [Min(0f)] private float introStartDelay;
+        [SerializeField] [Range(0f, 1f)] private float introStartVolume = 1f;
+        [SerializeField] private AnimationCurve introFallCurve = new(
+            new Keyframe(0f, 0f, 0f, 2.8f),
+            new Keyframe(1f, 1f, 2.1f, 0f));
+
         [Header("Visual Palette")]
         [SerializeField] private bool autoCaptureVisualPalette = true;
         [SerializeField] private Sprite defaultPathSprite;
@@ -38,8 +56,12 @@ namespace ProjectExtinguisher.Gameplay.Levels
         [SerializeField] private List<Sprite> pathVariantSprites = new();
 
         private readonly Dictionary<Vector2Int, LevelData.CellLevelState> stateByCoordinate = new();
+        private readonly Dictionary<HexCell, Vector3> introTargetPositions = new();
         private LevelData currentLevel;
         private int currentLevelIndex = -1;
+        private Coroutine levelIntroRoutine;
+        private Coroutine introAudioRoutine;
+        private AudioSource introAudioSource;
 
         public LevelData SelectedLevel => selectedLevel;
         public LevelData CurrentLevel => currentLevel;
@@ -54,6 +76,11 @@ namespace ProjectExtinguisher.Gameplay.Levels
         private void Awake()
         {
             CacheReferences();
+        }
+
+        private void OnDisable()
+        {
+            StopLevelIntroAnimation();
         }
 
         private void Start()
@@ -71,6 +98,12 @@ namespace ProjectExtinguisher.Gameplay.Levels
         private void OnValidate()
         {
             CacheReferences();
+            introOffscreenPadding = Mathf.Max(0f, introOffscreenPadding);
+            introLineDelay = Mathf.Max(0f, introLineDelay);
+            introBaseFallDuration = Mathf.Max(0.01f, introBaseFallDuration);
+            introSpeedMultiplier = Mathf.Max(0.1f, introSpeedMultiplier);
+            introStartDelay = Mathf.Max(0f, introStartDelay);
+            introStartVolume = Mathf.Clamp01(introStartVolume);
         }
 
         [ContextMenu("Apply Selected Level")]
@@ -118,6 +151,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
         public void ApplyLevel(LevelData level)
         {
             CacheReferences();
+            StopLevelIntroAnimation();
 
             if (level == null)
             {
@@ -183,7 +217,347 @@ namespace ProjectExtinguisher.Gameplay.Levels
                 larryController.CaptureInitialState();
             }
 
+            if (ShouldPlayLevelIntro())
+            {
+                levelIntroRoutine = StartCoroutine(PlayLevelIntro());
+            }
+            else
+            {
+                if (tileActivationController != null)
+                {
+                    tileActivationController.SetInputLocked(false);
+                }
+
+                if (larryController != null)
+                {
+                    larryController.SetVisualVisible(true);
+                }
+            }
+
             Log($"Applied level '{level.GetDisplayName()}' with move limit {level.MoveLimit}.");
+        }
+
+        private bool ShouldPlayLevelIntro()
+        {
+            return Application.isPlaying
+                && playLevelIntroOnLoad
+                && introBaseFallDuration > 0f
+                && gridManager != null
+                && gridManager.CellCount > 0;
+        }
+
+        private IEnumerator PlayLevelIntro()
+        {
+            IReadOnlyList<HexCell> cells = gridManager.GetAllCells();
+            if (cells == null || cells.Count == 0)
+            {
+                CompleteLevelIntro();
+                yield break;
+            }
+
+            if (tileActivationController != null)
+            {
+                tileActivationController.SetInputLocked(true);
+            }
+
+            if (larryController != null)
+            {
+                larryController.SetVisualVisible(false);
+            }
+
+            PlayIntroStartAudio();
+
+            Dictionary<int, List<HexCell>> cellsByLine = BuildIntroLines(cells);
+            if (cellsByLine.Count == 0)
+            {
+                CompleteLevelIntro();
+                yield break;
+            }
+
+            float introDuration = GetIntroFallDuration();
+
+            introTargetPositions.Clear();
+
+            for (int index = 0; index < cells.Count; index++)
+            {
+                HexCell cell = cells[index];
+                if (cell == null)
+                {
+                    continue;
+                }
+
+                Vector3 targetPosition = cell.transform.position;
+                introTargetPositions[cell] = targetPosition;
+                cell.transform.position = ResolveIntroStartPosition(targetPosition);
+            }
+
+            List<int> orderedLines = new(cellsByLine.Keys);
+            orderedLines.Sort();
+
+            for (int lineIndex = 0; lineIndex < orderedLines.Count; lineIndex++)
+            {
+                List<HexCell> lineCells = cellsByLine[orderedLines[lineIndex]];
+                for (int cellIndex = 0; cellIndex < lineCells.Count; cellIndex++)
+                {
+                    HexCell cell = lineCells[cellIndex];
+                    if (cell == null || !introTargetPositions.TryGetValue(cell, out Vector3 targetPosition))
+                    {
+                        continue;
+                    }
+
+                    StartCoroutine(AnimateIntroDrop(cell, targetPosition, introDuration));
+                }
+
+                if (lineIndex < orderedLines.Count - 1 && introLineDelay > 0f)
+                {
+                    yield return new WaitForSeconds(introLineDelay);
+                }
+            }
+
+            yield return new WaitForSeconds(introDuration);
+            CompleteLevelIntro();
+        }
+
+        private IEnumerator AnimateIntroDrop(HexCell cell, Vector3 targetPosition, float duration)
+        {
+            if (cell == null)
+            {
+                yield break;
+            }
+
+            Vector3 startPosition = cell.transform.position;
+            float elapsed = 0f;
+
+            while (elapsed < duration)
+            {
+                elapsed += Time.deltaTime;
+                float normalizedTime = Mathf.Clamp01(elapsed / duration);
+                float easedTime = EvaluateIntroCurve(normalizedTime);
+                cell.transform.position = Vector3.LerpUnclamped(startPosition, targetPosition, easedTime);
+                yield return null;
+            }
+
+            cell.transform.position = targetPosition;
+        }
+
+        private Dictionary<int, List<HexCell>> BuildIntroLines(IReadOnlyList<HexCell> cells)
+        {
+            Dictionary<int, List<HexCell>> cellsByLine = new();
+            List<float> projections = new(cells.Count);
+            List<float> cellProjections = new(cells.Count);
+            float minimumProjection = float.MaxValue;
+
+            for (int index = 0; index < cells.Count; index++)
+            {
+                HexCell cell = cells[index];
+                if (cell == null)
+                {
+                    cellProjections.Add(0f);
+                    continue;
+                }
+
+                float projection = GetIntroProjection(cell.transform.position);
+                cellProjections.Add(projection);
+                projections.Add(projection);
+                minimumProjection = Mathf.Min(minimumProjection, projection);
+            }
+
+            if (projections.Count == 0)
+            {
+                return cellsByLine;
+            }
+
+            float lineSpacing = ResolveIntroLineSpacing(projections);
+
+            for (int index = 0; index < cells.Count; index++)
+            {
+                HexCell cell = cells[index];
+                if (cell == null)
+                {
+                    continue;
+                }
+
+                int lineIndex = Mathf.RoundToInt((cellProjections[index] - minimumProjection) / lineSpacing);
+                if (!cellsByLine.TryGetValue(lineIndex, out List<HexCell> lineCells))
+                {
+                    lineCells = new List<HexCell>();
+                    cellsByLine.Add(lineIndex, lineCells);
+                }
+
+                lineCells.Add(cell);
+            }
+
+            return cellsByLine;
+        }
+
+        private void StopLevelIntroAnimation()
+        {
+            if (levelIntroRoutine != null)
+            {
+                StopCoroutine(levelIntroRoutine);
+                levelIntroRoutine = null;
+            }
+
+            if (introAudioRoutine != null)
+            {
+                StopCoroutine(introAudioRoutine);
+                introAudioRoutine = null;
+            }
+
+            SnapIntroCellsToTargets();
+
+            if (tileActivationController != null)
+            {
+                tileActivationController.SetInputLocked(false);
+            }
+
+            if (larryController != null)
+            {
+                larryController.SetVisualVisible(true);
+            }
+        }
+
+        private void CompleteLevelIntro()
+        {
+            SnapIntroCellsToTargets();
+
+            if (larryController != null)
+            {
+                larryController.ResetToInitialState();
+                larryController.SetVisualVisible(true);
+            }
+
+            if (tileActivationController != null)
+            {
+                tileActivationController.SetInputLocked(false);
+            }
+
+            levelIntroRoutine = null;
+        }
+
+        private void SnapIntroCellsToTargets()
+        {
+            foreach (KeyValuePair<HexCell, Vector3> entry in introTargetPositions)
+            {
+                if (entry.Key != null)
+                {
+                    entry.Key.transform.position = entry.Value;
+                }
+            }
+
+            introTargetPositions.Clear();
+        }
+
+        private float GetIntroFallDuration()
+        {
+            return introBaseFallDuration / Mathf.Max(0.1f, introSpeedMultiplier);
+        }
+
+        private void PlayIntroStartAudio()
+        {
+            if (introStartClip == null || introStartVolume <= 0f)
+            {
+                return;
+            }
+
+            if (introAudioRoutine != null)
+            {
+                StopCoroutine(introAudioRoutine);
+                introAudioRoutine = null;
+            }
+
+            introAudioRoutine = StartCoroutine(PlayIntroStartAudioRoutine());
+        }
+
+        private IEnumerator PlayIntroStartAudioRoutine()
+        {
+            if (introStartDelay > 0f)
+            {
+                yield return new WaitForSecondsRealtime(introStartDelay);
+            }
+
+            EnsureIntroAudioSource();
+            if (introAudioSource == null)
+            {
+                introAudioRoutine = null;
+                yield break;
+            }
+
+            introAudioSource.PlayOneShot(introStartClip, introStartVolume);
+            introAudioRoutine = null;
+        }
+
+        private void EnsureIntroAudioSource()
+        {
+            if (introAudioSource == null)
+            {
+                GameObject audioObject = new GameObject("Level Intro Audio Source");
+                audioObject.transform.SetParent(transform, false);
+                introAudioSource = audioObject.AddComponent<AudioSource>();
+            }
+
+            introAudioSource.playOnAwake = false;
+            introAudioSource.loop = false;
+            introAudioSource.spatialBlend = 0f;
+            introAudioSource.pitch = 1f;
+            introAudioSource.volume = 1f;
+        }
+
+        private Vector3 ResolveIntroStartPosition(Vector3 targetPosition)
+        {
+            float startY = targetPosition.y + introOffscreenPadding;
+            Camera camera = ResolveIntroCamera();
+            if (camera != null && camera.orthographic)
+            {
+                float cameraTopY = camera.transform.position.y + camera.orthographicSize;
+                startY = Mathf.Max(startY, cameraTopY + introOffscreenPadding);
+            }
+
+            return new Vector3(targetPosition.x, startY, targetPosition.z);
+        }
+
+        private Camera ResolveIntroCamera()
+        {
+            if (introCamera == null)
+            {
+                introCamera = Camera.main;
+            }
+
+            return introCamera;
+        }
+
+        private float EvaluateIntroCurve(float normalizedTime)
+        {
+            if (introFallCurve == null || introFallCurve.length == 0)
+            {
+                return normalizedTime;
+            }
+
+            return introFallCurve.Evaluate(normalizedTime);
+        }
+
+        private static float GetIntroProjection(Vector3 position)
+        {
+            return position.x - position.y;
+        }
+
+        private static float ResolveIntroLineSpacing(List<float> projections)
+        {
+            projections.Sort();
+
+            float smallestSpacing = float.MaxValue;
+            const float minimumSpacing = 0.01f;
+
+            for (int index = 1; index < projections.Count; index++)
+            {
+                float spacing = projections[index] - projections[index - 1];
+                if (spacing > minimumSpacing && spacing < smallestSpacing)
+                {
+                    smallestSpacing = spacing;
+                }
+            }
+
+            return smallestSpacing == float.MaxValue ? 1f : smallestSpacing;
         }
 
         [ContextMenu("Capture Visual Palette")]
@@ -389,6 +763,11 @@ namespace ProjectExtinguisher.Gameplay.Levels
             if (gameHUD == null)
             {
                 gameHUD = FindFirstObjectByType<GameHUD>();
+            }
+
+            if (introCamera == null)
+            {
+                introCamera = Camera.main;
             }
 
             if (gameHUD != null)

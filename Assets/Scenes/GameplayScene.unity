@@ -3771,6 +3771,8 @@ MonoBehaviour:
   loseVolume: 1
   restartClip: {fileID: 8300000, guid: ef5e71d79406da44896cc218dd15a9cb, type: 3}
   restartVolume: 1
+  healthTileClip: {fileID: 8300000, guid: 9d21809343af7e041b8e869c21bebbaf, type: 3}
+  healthTileVolume: 1
   musicAudioSource: {fileID: 0}
   sfxAudioSource: {fileID: 0}
   maxCatapultChainCount: 8
@@ -3898,6 +3900,39 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7c4ac5de1843445d8e682bafd28dd364, type: 2}
   applySelectedLevelOnStart: 1
   defaultInitialActiveState: 0
+  playLevelIntroOnLoad: 1
+  introCamera: {fileID: 1944031184}
+  introOffscreenPadding: 5
+  introLineDelay: 0.02
+  introBaseFallDuration: 0.22
+  introSpeedMultiplier: 5
+  introStartClip: {fileID: 8300000, guid: 4796a3bada3a71b419c26b85bf2dbe26, type: 3}
+  introStartDelay: 0
+  introStartVolume: 1
+  introFallCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 2.8
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 2.1
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   autoCaptureVisualPalette: 1
   defaultPathSprite: {fileID: -347702476747834141, guid: fbf467827fe5902499e54594efade730, type: 3}
   startSprite: {fileID: -3909223923928814340, guid: a126c5df3e9b285468a3f1d453568441, type: 3}
@@ -3912,10 +3947,10 @@ MonoBehaviour:
   catapultVariantSprites:
   - {fileID: 3842018695705076438, guid: c8f16dd986b75c4408088d59d1c6bed7, type: 3}
   - {fileID: 3254245671566714605, guid: c7e0188468580f640ac372ab51883a73, type: 3}
-  - {fileID: 2436689576485346197, guid: 4f6efdc8fb8021140afc647ac0b409b0, type: 3}
+  - {fileID: -5762605819237412183, guid: 51a25b283f058734aa160be6034ed987, type: 3}
   - {fileID: -8250205929016015008, guid: 1a0f152144a23f5429d368ae6065e9c7, type: 3}
   - {fileID: -306436974536269106, guid: 30a3089e2fe4ffd49b60f9eef0274e1e, type: 3}
-  - {fileID: 2436689576485346197, guid: 4f6efdc8fb8021140afc647ac0b409b0, type: 3}
+  - {fileID: 5311293497848802971, guid: bc895a1f970265f43becb111f8d95506, type: 3}
   pathVariantSprites:
   - {fileID: -347702476747834141, guid: fbf467827fe5902499e54594efade730, type: 3}
   - {fileID: 2436689576485346197, guid: 4f6efdc8fb8021140afc647ac0b409b0, type: 3}
