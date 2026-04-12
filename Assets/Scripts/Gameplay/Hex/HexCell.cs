@@ -384,7 +384,7 @@ namespace ProjectExtinguisher.Gameplay.Hex
                 return Color.white;
             }
 
-            if (!isActive && !isStart)
+            if (!isActive && !isStart && !isGoal)
             {
                 return inactiveColor;
             }
