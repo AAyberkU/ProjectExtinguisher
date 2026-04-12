@@ -3892,6 +3892,7 @@ MonoBehaviour:
   tileActivationController: {fileID: 951144133}
   larryController: {fileID: 963192720}
   gameHUD: {fileID: 554775369}
+  backgroundPresentation: {fileID: 980442271}
   orderedLevels:
   - {fileID: 11400000, guid: 237110c7bd04d5e43a9254020a96657c, type: 2}
   - {fileID: 11400000, guid: 2d3160dd12baee84991a497b09ea9444, type: 2}
@@ -4178,6 +4179,58 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 951144135}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &980442270
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 980442272}
+  - component: {fileID: 980442271}
+  m_Layer: 0
+  m_Name: Background Presentation
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &980442271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 980442270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 80864ed7690436a498fa562dea55371d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectExtinguisher.UI.BackgroundPresentationController
+  backgroundSprite: {fileID: -7443756053782179069, guid: 8ece86ebd44866948aeb34967369723c, type: 3}
+  gameplayTint: {r: 1, g: 1, b: 1, a: 1}
+  targetCamera: {fileID: 1944031184}
+  menuOverlayColor: {r: 0, g: 0, b: 0, a: 0.45}
+  menuZoomScale: 1.03
+  menuBackgroundTint: {r: 0.7, g: 0.7, b: 0.7, a: 1}
+  transitionDuration: 0.3
+  initialState: 1
+--- !u!4 &980442272
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 980442270}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.81062, y: 0.75429, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &984468834
 PrefabInstance:
@@ -8134,3 +8187,4 @@ SceneRoots:
   - {fileID: 951144135}
   - {fileID: 554775373}
   - {fileID: 451832367}
+  - {fileID: 980442272}

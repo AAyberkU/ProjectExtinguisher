@@ -19,6 +19,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
         [SerializeField] private TileActivationController tileActivationController;
         [SerializeField] private LarryController larryController;
         [SerializeField] private GameHUD gameHUD;
+        [SerializeField] private BackgroundPresentationController backgroundPresentation;
 
         [Header("Progression")]
         [SerializeField] private List<LevelData> orderedLevels = new();
@@ -154,6 +155,11 @@ namespace ProjectExtinguisher.Gameplay.Levels
                 tileActivationController.SetBackgroundMusicSuppressed(false);
             }
 
+            if (backgroundPresentation != null)
+            {
+                backgroundPresentation.SetGameplayState();
+            }
+
             ApplyLevel(startupLevel);
 
             if (!lastApplyLevelSucceeded)
@@ -231,6 +237,11 @@ namespace ProjectExtinguisher.Gameplay.Levels
                 tileActivationController.SetGameState(GameState.PreGame);
                 tileActivationController.SetInputLocked(true);
                 tileActivationController.SetBackgroundMusicSuppressed(true);
+            }
+
+            if (backgroundPresentation != null)
+            {
+                backgroundPresentation.SetMenuState();
             }
         }
 
@@ -924,6 +935,11 @@ namespace ProjectExtinguisher.Gameplay.Levels
             if (introCamera == null)
             {
                 introCamera = Camera.main;
+            }
+
+            if (backgroundPresentation == null)
+            {
+                backgroundPresentation = FindFirstObjectByType<BackgroundPresentationController>();
             }
 
             if (gameHUD != null)

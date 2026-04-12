@@ -16,7 +16,7 @@ namespace ProjectExtinguisher.UI
     {
         private const string StartGameButtonText = "Start Game";
         private const string ReturnToMainMenuButtonText = "Return to Main Menu";
-        private static readonly Color StartGameOverlayColor = new(0f, 0f, 0f, 0.75f);
+        private static readonly Color StartGameOverlayColor = new(0f, 0f, 0f, 0f);
         private static readonly Color StartGameButtonColor = new(0.1f, 0.14f, 0.18f, 0.96f);
         private static readonly Color StartGameLabelColor = new(0.97f, 0.97f, 0.97f, 1f);
         private static readonly Vector2 StartGameButtonSize = new(320f, 96f);
