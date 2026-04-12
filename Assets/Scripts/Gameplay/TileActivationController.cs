@@ -45,6 +45,20 @@ namespace ProjectExtinguisher.Gameplay
         [SerializeField] private bool allowMouseActivation = true;
         [SerializeField] private bool allowKeyboardReset = true;
 
+        [Header("Audio")]
+        [SerializeField] private AudioClip backgroundMusicClip;
+        [SerializeField] [Range(0f, 1f)] private float backgroundMusicVolume = 1f;
+        [SerializeField] private AudioClip catapultLaunchClip;
+        [SerializeField] [Range(0f, 1f)] private float catapultLaunchVolume = 1f;
+        [SerializeField] private AudioClip levelCompleteClip;
+        [SerializeField] [Range(0f, 1f)] private float levelCompleteVolume = 1f;
+        [SerializeField] private AudioClip loseClip;
+        [SerializeField] [Range(0f, 1f)] private float loseVolume = 1f;
+        [SerializeField] private AudioClip restartClip;
+        [SerializeField] [Range(0f, 1f)] private float restartVolume = 1f;
+        [SerializeField] private AudioSource musicAudioSource;
+        [SerializeField] private AudioSource sfxAudioSource;
+
         private readonly List<CellPlanningSnapshot> initialSnapshots = new();
         private bool hasCapturedInitialState;
         private Coroutine movementResolutionRoutine;
@@ -67,18 +81,29 @@ namespace ProjectExtinguisher.Gameplay
         private void Awake()
         {
             CacheReferences();
+            EnsureAudioSources();
             SyncPlanningMovesForEditor();
             CaptureInitialPlanningState();
+            RefreshBackgroundMusic();
         }
 
         private void OnValidate()
         {
             CacheReferences();
             planningMoveLimit = Mathf.Max(0, planningMoveLimit);
+            backgroundMusicVolume = Mathf.Clamp01(backgroundMusicVolume);
+            catapultLaunchVolume = Mathf.Clamp01(catapultLaunchVolume);
+            levelCompleteVolume = Mathf.Clamp01(levelCompleteVolume);
+            loseVolume = Mathf.Clamp01(loseVolume);
+            restartVolume = Mathf.Clamp01(restartVolume);
 
             if (!Application.isPlaying)
             {
                 SyncPlanningMovesForEditor();
+            }
+            else
+            {
+                RefreshBackgroundMusic();
             }
         }
 
@@ -243,6 +268,7 @@ namespace ProjectExtinguisher.Gameplay
                 return;
             }
 
+            PlayOneShotSfx(restartClip, restartVolume);
             ResetPlanningState();
         }
 
@@ -384,7 +410,9 @@ namespace ProjectExtinguisher.Gameplay
                     launchDestination.SetActive(true);
                 }
 
-                if (larryController == null || !larryController.MoveToCell(launchDestination))
+                PlayOneShotSfx(catapultLaunchClip, catapultLaunchVolume);
+
+                if (larryController == null || !larryController.MoveToCell(launchDestination, false))
                 {
                     LogWarning($"Catapult launch from {DescribeCell(finalCell)} to {DescribeCell(launchDestination)} could not start.");
                     break;
@@ -478,6 +506,7 @@ namespace ProjectExtinguisher.Gameplay
 
             hasWon = true;
             SetGameState(GameState.Resolution);
+            PlayOneShotSfx(levelCompleteClip, levelCompleteVolume);
             Log($"Larry reached the goal at {DescribeCell(goalCell)}. Win state entered. Tile activation input is now locked until reset.");
         }
 
@@ -490,6 +519,7 @@ namespace ProjectExtinguisher.Gameplay
 
             hasLost = true;
             SetGameState(GameState.Resolution);
+            PlayOneShotSfx(loseClip, loseVolume);
             Log($"Larry ran out of moves after activating {DescribeCell(finalCell)}. Fail state entered. Tile activation input is now locked until reset.");
         }
 
@@ -514,6 +544,124 @@ namespace ProjectExtinguisher.Gameplay
             {
                 gameHUD = FindFirstObjectByType<GameHUD>();
             }
+
+            if (musicAudioSource == null || sfxAudioSource == null)
+            {
+                AudioSource[] audioSources = GetComponents<AudioSource>();
+                for (int index = 0; index < audioSources.Length; index++)
+                {
+                    AudioSource audioSource = audioSources[index];
+                    if (audioSource == null)
+                    {
+                        continue;
+                    }
+
+                    if (musicAudioSource == null && audioSource.loop)
+                    {
+                        musicAudioSource = audioSource;
+                        continue;
+                    }
+
+                    if (sfxAudioSource == null)
+                    {
+                        sfxAudioSource = audioSource;
+                    }
+                }
+            }
+        }
+
+        private void EnsureAudioSources()
+        {
+            if (musicAudioSource == null)
+            {
+                musicAudioSource = CreateRuntimeAudioSource("Music Audio Source");
+            }
+
+            if (sfxAudioSource == null)
+            {
+                sfxAudioSource = CreateRuntimeAudioSource("Sfx Audio Source");
+            }
+
+            ConfigureMusicAudioSource(musicAudioSource);
+            ConfigureSfxAudioSource(sfxAudioSource);
+        }
+
+        private AudioSource CreateRuntimeAudioSource(string sourceName)
+        {
+            GameObject audioObject = new GameObject(sourceName);
+            audioObject.transform.SetParent(transform, false);
+            return audioObject.AddComponent<AudioSource>();
+        }
+
+        private void ConfigureMusicAudioSource(AudioSource audioSource)
+        {
+            if (audioSource == null)
+            {
+                return;
+            }
+
+            audioSource.playOnAwake = false;
+            audioSource.loop = true;
+            audioSource.spatialBlend = 0f;
+            audioSource.volume = backgroundMusicVolume;
+        }
+
+        private void ConfigureSfxAudioSource(AudioSource audioSource)
+        {
+            if (audioSource == null)
+            {
+                return;
+            }
+
+            audioSource.playOnAwake = false;
+            audioSource.loop = false;
+            audioSource.spatialBlend = 0f;
+            audioSource.volume = 1f;
+        }
+
+        private void RefreshBackgroundMusic()
+        {
+            EnsureAudioSources();
+
+            if (musicAudioSource == null)
+            {
+                return;
+            }
+
+            musicAudioSource.volume = backgroundMusicVolume;
+
+            if (backgroundMusicClip == null || backgroundMusicVolume <= 0f)
+            {
+                if (musicAudioSource.isPlaying)
+                {
+                    musicAudioSource.Stop();
+                }
+
+                musicAudioSource.clip = null;
+                return;
+            }
+
+            if (musicAudioSource.clip != backgroundMusicClip)
+            {
+                musicAudioSource.clip = backgroundMusicClip;
+            }
+
+            if (!musicAudioSource.isPlaying)
+            {
+                musicAudioSource.Play();
+            }
+        }
+
+        private void PlayOneShotSfx(AudioClip clip, float volume)
+        {
+            EnsureAudioSources();
+
+            if (sfxAudioSource == null || clip == null || volume <= 0f)
+            {
+                return;
+            }
+
+            sfxAudioSource.PlayOneShot(clip, volume);
         }
 
         private bool IsRegisteredGridCell(HexCell cell)

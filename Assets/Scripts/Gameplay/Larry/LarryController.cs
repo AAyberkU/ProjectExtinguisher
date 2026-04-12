@@ -30,6 +30,11 @@ namespace ProjectExtinguisher.Gameplay.Larry
             new Keyframe(0.5f, 1f, 0f, 0f),
             new Keyframe(1f, 0f, 0f, 0f));
 
+        [Header("Audio")]
+        [SerializeField] private AudioClip jumpClip;
+        [SerializeField] [Range(0f, 1f)] private float jumpVolume = 1f;
+        [SerializeField] private AudioSource jumpAudioSource;
+
         [Header("Settle")]
         [SerializeField] [Min(0f)] private float settleDuration = 0.1f;
         [SerializeField] [Range(0f, 0.3f)] private float landingSquash = 0.08f;
@@ -55,6 +60,7 @@ namespace ProjectExtinguisher.Gameplay.Larry
         private void Awake()
         {
             CacheReferences();
+            EnsureAudioSource();
             CaptureInitialState();
         }
 
@@ -66,6 +72,12 @@ namespace ProjectExtinguisher.Gameplay.Larry
         private void OnValidate()
         {
             CacheReferences();
+            jumpVolume = Mathf.Clamp01(jumpVolume);
+
+            if (Application.isPlaying)
+            {
+                EnsureAudioSource();
+            }
 
             if (!Application.isPlaying && currentCell != null)
             {
@@ -124,6 +136,11 @@ namespace ProjectExtinguisher.Gameplay.Larry
 
         public bool MoveToCell(HexCell targetCell)
         {
+            return MoveToCell(targetCell, true);
+        }
+
+        public bool MoveToCell(HexCell targetCell, bool playJumpAudio)
+        {
             if (!IsRegisteredGridCell(targetCell))
             {
                 LogWarning($"Larry move skipped because {DescribeCell(targetCell)} is not a registered cell.");
@@ -146,6 +163,11 @@ namespace ProjectExtinguisher.Gameplay.Larry
             HexCell previousCell = currentCell;
 
             currentCell = targetCell;
+
+            if (playJumpAudio)
+            {
+                PlayJumpAudio();
+            }
 
             if (previousCell == null || visualRoot == null || moveDuration <= 0f || hopHeight <= 0f)
             {
@@ -177,6 +199,52 @@ namespace ProjectExtinguisher.Gameplay.Larry
             {
                 visualSpriteRenderer = GetComponentInChildren<SpriteRenderer>(true);
             }
+
+            if (jumpAudioSource == null)
+            {
+                jumpAudioSource = GetComponent<AudioSource>();
+            }
+        }
+
+        private void EnsureAudioSource()
+        {
+            if (jumpAudioSource != null)
+            {
+                ConfigureAudioSource(jumpAudioSource);
+                return;
+            }
+
+            jumpAudioSource = GetComponent<AudioSource>();
+            if (jumpAudioSource == null)
+            {
+                jumpAudioSource = gameObject.AddComponent<AudioSource>();
+            }
+
+            ConfigureAudioSource(jumpAudioSource);
+        }
+
+        private void ConfigureAudioSource(AudioSource audioSource)
+        {
+            if (audioSource == null)
+            {
+                return;
+            }
+
+            audioSource.playOnAwake = false;
+            audioSource.loop = false;
+            audioSource.spatialBlend = 0f;
+        }
+
+        private void PlayJumpAudio()
+        {
+            EnsureAudioSource();
+
+            if (jumpAudioSource == null || jumpClip == null || jumpVolume <= 0f)
+            {
+                return;
+            }
+
+            jumpAudioSource.PlayOneShot(jumpClip, jumpVolume);
         }
 
         private HexCell ResolveInitialCell()
