@@ -14,6 +14,13 @@ namespace ProjectExtinguisher.UI
     /// </summary>
     public sealed class GameHUD : MonoBehaviour
     {
+        private const string StartGameButtonText = "Start Game";
+        private const string ReturnToMainMenuButtonText = "Return to Main Menu";
+        private static readonly Color StartGameOverlayColor = new(0f, 0f, 0f, 0.75f);
+        private static readonly Color StartGameButtonColor = new(0.1f, 0.14f, 0.18f, 0.96f);
+        private static readonly Color StartGameLabelColor = new(0.97f, 0.97f, 0.97f, 1f);
+        private static readonly Vector2 StartGameButtonSize = new(320f, 96f);
+
         // ──────────────────────────────────────────────────────────────────────────
         // Inspector fields
         // ──────────────────────────────────────────────────────────────────────────
@@ -70,6 +77,10 @@ namespace ProjectExtinguisher.UI
         private bool outcomeShown;
         private Coroutine hintRoutine;
         private Coroutine outcomeRoutine;
+        private CanvasGroup startGameOverlay;
+        private Button startGameButton;
+        private TextMeshProUGUI startGameButtonLabel;
+        private bool startGameOverlayVisible;
 
         // ──────────────────────────────────────────────────────────────────────────
         // Public API
@@ -122,6 +133,73 @@ namespace ProjectExtinguisher.UI
         {
             levelLoader = loader;
             UpdateNextLevelButtonLabel();
+        }
+
+        public bool ShowStartGameOverlay()
+        {
+            EnsureStartGameOverlay();
+            if (startGameOverlay == null)
+            {
+                return false;
+            }
+
+            startGameOverlayVisible = true;
+
+            if (hintRoutine != null)
+            {
+                StopCoroutine(hintRoutine);
+                hintRoutine = null;
+            }
+
+            if (outcomeRoutine != null)
+            {
+                StopCoroutine(outcomeRoutine);
+                outcomeRoutine = null;
+            }
+
+            SetLabelAlpha(movesLeftLabel, 0f);
+            SetLabelAlpha(levelLabel, 0f);
+            SetLabelAlpha(resetHintLabel, 0f);
+            SetLabelAlpha(gameplayHintLabel, 0f);
+            SetOutcomePanelAlpha(0f);
+            SetNextLevelButtonVisible(false);
+
+            if (startGameButtonLabel != null)
+            {
+                startGameButtonLabel.text = StartGameButtonText;
+            }
+
+            startGameOverlay.gameObject.SetActive(true);
+            startGameOverlay.transform.SetAsLastSibling();
+            startGameOverlay.alpha = 1f;
+            startGameOverlay.interactable = true;
+            startGameOverlay.blocksRaycasts = true;
+
+            if (startGameButton != null)
+            {
+                startGameButton.interactable = true;
+            }
+
+            return true;
+        }
+
+        public void HideStartGameOverlay()
+        {
+            if (startGameOverlay == null)
+            {
+                return;
+            }
+
+            startGameOverlayVisible = false;
+
+            startGameOverlay.alpha = 0f;
+            startGameOverlay.interactable = false;
+            startGameOverlay.blocksRaycasts = false;
+            startGameOverlay.gameObject.SetActive(false);
+
+            SetLabelAlpha(movesLeftLabel, 1f);
+            SetLabelAlpha(levelLabel, 1f);
+            SetLabelAlpha(resetHintLabel, 1f);
         }
 
         // ──────────────────────────────────────────────────────────────────────────
@@ -213,6 +291,8 @@ namespace ProjectExtinguisher.UI
             {
                 movesLeftLabel.color = movesColorNormal;
             }
+
+            SetLabelAlpha(movesLeftLabel, startGameOverlayVisible ? 0f : 1f);
         }
 
         private void CheckOutcome()
@@ -236,6 +316,7 @@ namespace ProjectExtinguisher.UI
         {
             outcomeShown = true;
             bool canLoadNextLevel = isWin && levelLoader != null && levelLoader.HasNextLevel;
+            bool canReturnToMainMenu = isWin && levelLoader != null && !levelLoader.HasNextLevel;
 
             if (outcomeHeadline != null)
             {
@@ -247,7 +328,8 @@ namespace ProjectExtinguisher.UI
                 outcomeSubline.text = isWin && !canLoadNextLevel ? finalLevelSublineText : outcomeSublineText;
             }
 
-            SetNextLevelButtonVisible(canLoadNextLevel);
+            SetNextLevelButtonVisible(canLoadNextLevel || canReturnToMainMenu);
+            UpdateOutcomeActionButtonLabel(canLoadNextLevel, canReturnToMainMenu);
 
             if (outcomeRoutine != null)
             {
@@ -263,6 +345,11 @@ namespace ProjectExtinguisher.UI
             if (nextLevelButton != null)
             {
                 nextLevelButton.onClick.RemoveListener(HandleNextLevelClicked);
+            }
+
+            if (startGameButton != null)
+            {
+                startGameButton.onClick.RemoveListener(HandleStartGameClicked);
             }
         }
 
@@ -389,10 +476,35 @@ namespace ProjectExtinguisher.UI
             UpdateNextLevelButtonLabel();
         }
 
+        private void HandleStartGameClicked()
+        {
+            TryCacheLevelLoader();
+            if (startGameButton != null)
+            {
+                startGameButton.interactable = false;
+            }
+
+            if (levelLoader != null && levelLoader.BeginStartupGame())
+            {
+                return;
+            }
+
+            if (startGameButton != null)
+            {
+                startGameButton.interactable = true;
+            }
+        }
+
         private void HandleNextLevelClicked()
         {
             if (levelLoader == null)
             {
+                return;
+            }
+
+            if (controller != null && controller.HasWon && !levelLoader.HasNextLevel)
+            {
+                levelLoader.ReturnToStartupGate();
                 return;
             }
 
@@ -407,6 +519,22 @@ namespace ProjectExtinguisher.UI
             }
         }
 
+        private void UpdateOutcomeActionButtonLabel(bool canLoadNextLevel, bool canReturnToMainMenu)
+        {
+            if (nextLevelButtonLabel == null)
+            {
+                return;
+            }
+
+            if (canReturnToMainMenu)
+            {
+                nextLevelButtonLabel.text = ReturnToMainMenuButtonText;
+                return;
+            }
+
+            nextLevelButtonLabel.text = canLoadNextLevel ? nextLevelButtonText : nextLevelButtonText;
+        }
+
         private void SetNextLevelButtonVisible(bool visible)
         {
             if (nextLevelButton == null)
@@ -416,6 +544,100 @@ namespace ProjectExtinguisher.UI
 
             nextLevelButton.gameObject.SetActive(visible);
             nextLevelButton.interactable = visible;
+        }
+
+        private void EnsureStartGameOverlay()
+        {
+            if (startGameOverlay != null && startGameButton != null && startGameButtonLabel != null)
+            {
+                return;
+            }
+
+            Canvas canvas = GetComponentInParent<Canvas>();
+            RectTransform parent = canvas != null ? canvas.transform as RectTransform : transform as RectTransform;
+            if (parent == null)
+            {
+                return;
+            }
+
+            GameObject overlayObject = new GameObject("Start Game Overlay", typeof(RectTransform), typeof(Image), typeof(CanvasGroup));
+            RectTransform overlayTransform = overlayObject.GetComponent<RectTransform>();
+            overlayTransform.SetParent(parent, false);
+            overlayTransform.anchorMin = Vector2.zero;
+            overlayTransform.anchorMax = Vector2.one;
+            overlayTransform.offsetMin = Vector2.zero;
+            overlayTransform.offsetMax = Vector2.zero;
+
+            Image overlayImage = overlayObject.GetComponent<Image>();
+            overlayImage.color = StartGameOverlayColor;
+
+            startGameOverlay = overlayObject.GetComponent<CanvasGroup>();
+
+            GameObject buttonObject = new GameObject("Start Game Button", typeof(RectTransform), typeof(Image), typeof(Button));
+            RectTransform buttonTransform = buttonObject.GetComponent<RectTransform>();
+            buttonTransform.SetParent(overlayTransform, false);
+            buttonTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            buttonTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            buttonTransform.pivot = new Vector2(0.5f, 0.5f);
+            buttonTransform.sizeDelta = StartGameButtonSize;
+            buttonTransform.anchoredPosition = Vector2.zero;
+
+            Image buttonImage = buttonObject.GetComponent<Image>();
+            buttonImage.color = StartGameButtonColor;
+
+            startGameButton = buttonObject.GetComponent<Button>();
+            startGameButton.targetGraphic = buttonImage;
+            startGameButton.onClick.RemoveListener(HandleStartGameClicked);
+            startGameButton.onClick.AddListener(HandleStartGameClicked);
+
+            GameObject labelObject = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI));
+            RectTransform labelTransform = labelObject.GetComponent<RectTransform>();
+            labelTransform.SetParent(buttonTransform, false);
+            labelTransform.anchorMin = Vector2.zero;
+            labelTransform.anchorMax = Vector2.one;
+            labelTransform.offsetMin = new Vector2(16f, 10f);
+            labelTransform.offsetMax = new Vector2(-16f, -10f);
+
+            startGameButtonLabel = labelObject.GetComponent<TextMeshProUGUI>();
+            startGameButtonLabel.alignment = TextAlignmentOptions.Center;
+            startGameButtonLabel.color = StartGameLabelColor;
+            startGameButtonLabel.enableAutoSizing = true;
+            startGameButtonLabel.fontSizeMin = 18f;
+            startGameButtonLabel.fontSizeMax = 42f;
+            startGameButtonLabel.text = StartGameButtonText;
+
+            TMP_FontAsset fontAsset = ResolveHudFontAsset();
+            if (fontAsset != null)
+            {
+                startGameButtonLabel.font = fontAsset;
+            }
+
+            HideStartGameOverlay();
+        }
+
+        private TMP_FontAsset ResolveHudFontAsset()
+        {
+            if (levelLabel != null)
+            {
+                return levelLabel.font;
+            }
+
+            if (movesLeftLabel != null)
+            {
+                return movesLeftLabel.font;
+            }
+
+            if (gameplayHintLabel != null)
+            {
+                return gameplayHintLabel.font;
+            }
+
+            if (outcomeHeadline != null)
+            {
+                return outcomeHeadline.font;
+            }
+
+            return TMP_Settings.defaultFontAsset;
         }
 
         private void Log(string message)

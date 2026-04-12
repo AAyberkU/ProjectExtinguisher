@@ -25,6 +25,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
 
         [Header("Application")]
         [SerializeField] private bool applySelectedLevelOnStart = true;
+        [SerializeField] private bool showStartGameOnStartup = true;
         [SerializeField] private bool defaultInitialActiveState;
 
         [Header("Level Intro")]
@@ -58,24 +59,36 @@ namespace ProjectExtinguisher.Gameplay.Levels
         private readonly Dictionary<Vector2Int, LevelData.CellLevelState> stateByCoordinate = new();
         private readonly Dictionary<HexCell, Vector3> introTargetPositions = new();
         private LevelData currentLevel;
+        private LevelData startupLevelReference;
+        private LevelData pendingStartupLevel;
         private int currentLevelIndex = -1;
+        private bool lastApplyLevelSucceeded;
         private Coroutine levelIntroRoutine;
         private Coroutine introAudioRoutine;
         private AudioSource introAudioSource;
+        private bool startupGatePending;
 
         public LevelData SelectedLevel => selectedLevel;
         public LevelData CurrentLevel => currentLevel;
         public int CurrentLevelIndex => currentLevelIndex;
         public bool HasNextLevel => TryGetNextLevel(out _);
+        public bool IsStartupGatePending => startupGatePending;
 
         private void Reset()
         {
             CacheReferences();
+            CacheStartupLevelReference();
         }
 
         private void Awake()
         {
             CacheReferences();
+            CacheStartupLevelReference();
+
+            if (ShouldUseStartupGateOnStartup())
+            {
+                PrepareStartupGateVisualState();
+            }
         }
 
         private void OnDisable()
@@ -87,10 +100,17 @@ namespace ProjectExtinguisher.Gameplay.Levels
         {
             if (applySelectedLevelOnStart)
             {
-                LevelData startupLevel = GetStartupLevel();
+                LevelData startupLevel = GetStartupLevelReference();
                 if (startupLevel != null)
                 {
-                    ApplyLevel(startupLevel);
+                    if (ShouldUseStartupGateOnStartup())
+                    {
+                        PrepareStartupGate(startupLevel);
+                    }
+                    else
+                    {
+                        ApplyLevel(startupLevel);
+                    }
                 }
             }
         }
@@ -98,6 +118,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
         private void OnValidate()
         {
             CacheReferences();
+            CacheStartupLevelReference();
             introOffscreenPadding = Mathf.Max(0f, introOffscreenPadding);
             introLineDelay = Mathf.Max(0f, introLineDelay);
             introBaseFallDuration = Mathf.Max(0.01f, introBaseFallDuration);
@@ -112,6 +133,107 @@ namespace ProjectExtinguisher.Gameplay.Levels
             ApplyLevel(selectedLevel);
         }
 
+        public bool ShouldUseStartupGateOnStartup()
+        {
+            return showStartGameOnStartup
+                && applySelectedLevelOnStart
+                && GetStartupLevelReference() != null;
+        }
+
+        public bool BeginStartupGame()
+        {
+            if (!startupGatePending || pendingStartupLevel == null)
+            {
+                return false;
+            }
+
+            LevelData startupLevel = pendingStartupLevel;
+
+            if (tileActivationController != null)
+            {
+                tileActivationController.SetBackgroundMusicSuppressed(false);
+            }
+
+            ApplyLevel(startupLevel);
+
+            if (!lastApplyLevelSucceeded)
+            {
+                pendingStartupLevel = startupLevel;
+                startupGatePending = true;
+                PrepareStartupGateVisualState();
+
+                if (gameHUD != null)
+                {
+                    gameHUD.ShowStartGameOverlay();
+                }
+
+                return false;
+            }
+
+            startupGatePending = false;
+            pendingStartupLevel = null;
+
+            if (gameHUD != null)
+            {
+                gameHUD.HideStartGameOverlay();
+            }
+
+            return true;
+        }
+
+        public bool ReturnToStartupGate()
+        {
+            LevelData startupLevel = GetStartupLevelReference();
+            if (startupLevel == null)
+            {
+                return false;
+            }
+
+            PrepareStartupGate(startupLevel);
+            return startupGatePending;
+        }
+
+        private void PrepareStartupGate(LevelData startupLevel)
+        {
+            pendingStartupLevel = startupLevel;
+            startupGatePending = true;
+
+            PrepareStartupGateVisualState();
+
+            if (gameHUD != null)
+            {
+                gameHUD.BindLevelLoader(this);
+                if (gameHUD.ShowStartGameOverlay())
+                {
+                    return;
+                }
+            }
+
+            BeginStartupGame();
+        }
+
+        private void PrepareStartupGateVisualState()
+        {
+            if (gridManager != null)
+            {
+                gridManager.RebuildRegistry();
+            }
+
+            SetGridVisualsVisible(false);
+
+            if (larryController != null)
+            {
+                larryController.SetVisualVisible(false);
+            }
+
+            if (tileActivationController != null)
+            {
+                tileActivationController.SetGameState(GameState.PreGame);
+                tileActivationController.SetInputLocked(true);
+                tileActivationController.SetBackgroundMusicSuppressed(true);
+            }
+        }
+
         public bool LoadNextLevel()
         {
             if (!TryGetNextLevel(out LevelData nextLevel))
@@ -121,7 +243,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
             }
 
             ApplyLevel(nextLevel);
-            return true;
+            return lastApplyLevelSucceeded;
         }
 
         public bool TryGetNextLevel(out LevelData nextLevel)
@@ -152,6 +274,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
         {
             CacheReferences();
             StopLevelIntroAnimation();
+            lastApplyLevelSucceeded = false;
 
             if (level == null)
             {
@@ -223,6 +346,8 @@ namespace ProjectExtinguisher.Gameplay.Levels
             }
             else
             {
+                SetGridVisualsVisible(true);
+
                 if (tileActivationController != null)
                 {
                     tileActivationController.SetInputLocked(false);
@@ -234,6 +359,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
                 }
             }
 
+            lastApplyLevelSucceeded = true;
             Log($"Applied level '{level.GetDisplayName()}' with move limit {level.MoveLimit}.");
         }
 
@@ -290,6 +416,8 @@ namespace ProjectExtinguisher.Gameplay.Levels
                 introTargetPositions[cell] = targetPosition;
                 cell.transform.position = ResolveIntroStartPosition(targetPosition);
             }
+
+            SetGridVisualsVisible(true);
 
             List<int> orderedLines = new(cellsByLine.Keys);
             orderedLines.Sort();
@@ -392,6 +520,8 @@ namespace ProjectExtinguisher.Gameplay.Levels
 
         private void StopLevelIntroAnimation()
         {
+            bool hadActiveIntro = levelIntroRoutine != null || introAudioRoutine != null || introTargetPositions.Count > 0;
+
             if (levelIntroRoutine != null)
             {
                 StopCoroutine(levelIntroRoutine);
@@ -404,7 +534,13 @@ namespace ProjectExtinguisher.Gameplay.Levels
                 introAudioRoutine = null;
             }
 
+            if (!hadActiveIntro)
+            {
+                return;
+            }
+
             SnapIntroCellsToTargets();
+            SetGridVisualsVisible(true);
 
             if (tileActivationController != null)
             {
@@ -420,6 +556,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
         private void CompleteLevelIntro()
         {
             SnapIntroCellsToTargets();
+            SetGridVisualsVisible(true);
 
             if (larryController != null)
             {
@@ -446,6 +583,24 @@ namespace ProjectExtinguisher.Gameplay.Levels
             }
 
             introTargetPositions.Clear();
+        }
+
+        private void SetGridVisualsVisible(bool visible)
+        {
+            if (gridManager == null)
+            {
+                return;
+            }
+
+            IReadOnlyList<HexCell> cells = gridManager.GetAllCells();
+            for (int index = 0; index < cells.Count; index++)
+            {
+                HexCell cell = cells[index];
+                if (cell != null)
+                {
+                    cell.SetVisualVisible(visible);
+                }
+            }
         }
 
         private float GetIntroFallDuration()
@@ -657,6 +812,7 @@ namespace ProjectExtinguisher.Gameplay.Levels
 
             cell.ConfigureCatapult(isCatapult, catapultDirection);
             cell.ConfigureMoveBonus(isMoveBonus, moveBonusAmount);
+            cell.SetBlockerVariantSortingIndex(walkable ? -1 : visualVariantIndex);
             cell.ApplyState(active, walkable, isStart, isGoal, false);
             ApplyCellSprite(cell, walkable, isStart, isGoal, isCatapult, catapultDirection, isMoveBonus, useVisualVariant, visualVariantIndex);
         }
@@ -776,7 +932,27 @@ namespace ProjectExtinguisher.Gameplay.Levels
             }
         }
 
-        private LevelData GetStartupLevel()
+        private void CacheStartupLevelReference()
+        {
+            if (Application.isPlaying && startupLevelReference != null)
+            {
+                return;
+            }
+
+            startupLevelReference = ResolveConfiguredStartupLevel();
+        }
+
+        private LevelData GetStartupLevelReference()
+        {
+            if (startupLevelReference == null)
+            {
+                startupLevelReference = ResolveConfiguredStartupLevel();
+            }
+
+            return startupLevelReference;
+        }
+
+        private LevelData ResolveConfiguredStartupLevel()
         {
             if (selectedLevel != null)
             {

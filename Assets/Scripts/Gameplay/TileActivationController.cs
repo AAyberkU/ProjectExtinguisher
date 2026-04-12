@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using ProjectExtinguisher.Gameplay.Hex;
 using ProjectExtinguisher.Gameplay.Larry;
+using ProjectExtinguisher.Gameplay.Levels;
 using ProjectExtinguisher.UI;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -64,6 +65,7 @@ namespace ProjectExtinguisher.Gameplay
         private readonly List<CellPlanningSnapshot> initialSnapshots = new();
         private bool hasCapturedInitialState;
         private bool inputLocked;
+        private bool backgroundMusicSuppressed;
         private Coroutine movementResolutionRoutine;
 
         [Header("Movement Effects")]
@@ -86,6 +88,7 @@ namespace ProjectExtinguisher.Gameplay
         {
             CacheReferences();
             EnsureAudioSources();
+            ApplyStartupBackgroundMusicSuppression();
             SyncPlanningMovesForEditor();
             CaptureInitialPlanningState();
             RefreshBackgroundMusic();
@@ -158,6 +161,17 @@ namespace ProjectExtinguisher.Gameplay
         public void SetInputLocked(bool value)
         {
             inputLocked = value;
+        }
+
+        public void SetBackgroundMusicSuppressed(bool value)
+        {
+            if (backgroundMusicSuppressed == value)
+            {
+                return;
+            }
+
+            backgroundMusicSuppressed = value;
+            RefreshBackgroundMusic();
         }
 
         [ContextMenu("Capture Initial Planning State")]
@@ -642,6 +656,16 @@ namespace ProjectExtinguisher.Gameplay
 
             musicAudioSource.volume = backgroundMusicVolume;
 
+            if (backgroundMusicSuppressed)
+            {
+                if (musicAudioSource.isPlaying)
+                {
+                    musicAudioSource.Stop();
+                }
+
+                return;
+            }
+
             if (backgroundMusicClip == null || backgroundMusicVolume <= 0f)
             {
                 if (musicAudioSource.isPlaying)
@@ -661,6 +685,15 @@ namespace ProjectExtinguisher.Gameplay
             if (!musicAudioSource.isPlaying)
             {
                 musicAudioSource.Play();
+            }
+        }
+
+        private void ApplyStartupBackgroundMusicSuppression()
+        {
+            LevelLoader levelLoader = GetComponent<LevelLoader>();
+            if (levelLoader != null && levelLoader.ShouldUseStartupGateOnStartup())
+            {
+                backgroundMusicSuppressed = true;
             }
         }
 

@@ -7,6 +7,9 @@ namespace ProjectExtinguisher.Gameplay.Hex
         private const int BaseTileSortingOrder = 0;
         private const int CatapultSortingOrder = 1;
         private const int BlockerSortingOrder = 2;
+        private const int BlockerVariantTwoOffset = 0;
+        private const int BlockerVariantZeroOffset = 1;
+        private const int BlockerVariantOneOffset = 2;
 
         public enum CatapultDirection
         {
@@ -46,6 +49,7 @@ namespace ProjectExtinguisher.Gameplay.Hex
         [SerializeField] private Collider2D cellCollider;
         [SerializeField] private bool driveSpriteColor = true;
         [SerializeField] private bool driveColliderEnabledState;
+        [SerializeField] private int blockerVariantSortingIndex = -1;
 
         [Header("Visual Colors")]
         [SerializeField] private Color inactiveColor = new(0.45f, 0.48f, 0.5f, 1f);
@@ -208,6 +212,32 @@ namespace ProjectExtinguisher.Gameplay.Hex
             Log($"Visual sprite changed on {gridIndex}.");
         }
 
+        public void SetVisualVisible(bool visible)
+        {
+            if (spriteRenderer == null)
+            {
+                CacheOptionalReferences();
+            }
+
+            if (spriteRenderer == null || spriteRenderer.enabled == visible)
+            {
+                return;
+            }
+
+            spriteRenderer.enabled = visible;
+        }
+
+        public void SetBlockerVariantSortingIndex(int variantIndex)
+        {
+            if (blockerVariantSortingIndex == variantIndex)
+            {
+                return;
+            }
+
+            blockerVariantSortingIndex = variantIndex;
+            RefreshVisuals();
+        }
+
         public void ConfigureCatapult(bool value, CatapultDirection direction, int launchDistance = 2)
         {
             int clampedLaunchDistance = Mathf.Max(1, launchDistance);
@@ -366,7 +396,7 @@ namespace ProjectExtinguisher.Gameplay.Hex
         {
             if (!isWalkable)
             {
-                return BlockerSortingOrder;
+                return BlockerSortingOrder + ResolveBlockerVariantSortingOffset();
             }
 
             if (isCatapult)
@@ -375,6 +405,17 @@ namespace ProjectExtinguisher.Gameplay.Hex
             }
 
             return BaseTileSortingOrder;
+        }
+
+        private int ResolveBlockerVariantSortingOffset()
+        {
+            return blockerVariantSortingIndex switch
+            {
+                1 => BlockerVariantOneOffset,
+                0 => BlockerVariantZeroOffset,
+                2 => BlockerVariantTwoOffset,
+                _ => BlockerVariantTwoOffset
+            };
         }
 
         private string BuildStateSummary()
