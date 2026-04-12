@@ -3883,6 +3883,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2d3160dd12baee84991a497b09ea9444, type: 2}
   - {fileID: 11400000, guid: 7e0e32f3d1a4450cb38d18af2baafb2c, type: 2}
   - {fileID: 11400000, guid: 9f94fbab08a34e1ebf0a4df31cc8670c, type: 2}
+  - {fileID: 11400000, guid: 7c4ac5de1843445d8e682bafd28dd364, type: 2}
   applySelectedLevelOnStart: 1
   defaultInitialActiveState: 0
   autoCaptureVisualPalette: 1
