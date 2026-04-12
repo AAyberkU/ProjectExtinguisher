@@ -7,6 +7,8 @@ namespace ProjectExtinguisher.Gameplay.Larry
 {
     public sealed class LarryController : MonoBehaviour
     {
+        private const int LarrySortingOrder = 10;
+
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs;
 
@@ -55,11 +57,13 @@ namespace ProjectExtinguisher.Gameplay.Larry
         private void Reset()
         {
             CacheReferences();
+            RefreshVisualSorting();
         }
 
         private void Awake()
         {
             CacheReferences();
+            RefreshVisualSorting();
             EnsureAudioSource();
             CaptureInitialState();
         }
@@ -72,6 +76,7 @@ namespace ProjectExtinguisher.Gameplay.Larry
         private void OnValidate()
         {
             CacheReferences();
+            RefreshVisualSorting();
             jumpVolume = Mathf.Clamp01(jumpVolume);
 
             if (Application.isPlaying)
@@ -221,6 +226,14 @@ namespace ProjectExtinguisher.Gameplay.Larry
             }
 
             ConfigureAudioSource(jumpAudioSource);
+        }
+
+        private void RefreshVisualSorting()
+        {
+            if (visualSpriteRenderer != null)
+            {
+                visualSpriteRenderer.sortingOrder = LarrySortingOrder;
+            }
         }
 
         private void ConfigureAudioSource(AudioSource audioSource)

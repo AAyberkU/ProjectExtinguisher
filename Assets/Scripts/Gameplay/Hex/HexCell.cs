@@ -4,6 +4,10 @@ namespace ProjectExtinguisher.Gameplay.Hex
 {
     public sealed class HexCell : MonoBehaviour
     {
+        private const int BaseTileSortingOrder = 0;
+        private const int CatapultSortingOrder = 1;
+        private const int BlockerSortingOrder = 2;
+
         public enum CatapultDirection
         {
             E = 0,
@@ -302,6 +306,11 @@ namespace ProjectExtinguisher.Gameplay.Hex
             if (driveSpriteColor && spriteRenderer != null)
             {
                 spriteRenderer.color = ResolveCellColor();
+                spriteRenderer.sortingOrder = ResolveSortingOrder();
+            }
+            else if (spriteRenderer != null)
+            {
+                spriteRenderer.sortingOrder = ResolveSortingOrder();
             }
 
             if (driveColliderEnabledState && cellCollider != null)
@@ -351,6 +360,21 @@ namespace ProjectExtinguisher.Gameplay.Hex
             }
 
             return Color.white;
+        }
+
+        private int ResolveSortingOrder()
+        {
+            if (!isWalkable)
+            {
+                return BlockerSortingOrder;
+            }
+
+            if (isCatapult)
+            {
+                return CatapultSortingOrder;
+            }
+
+            return BaseTileSortingOrder;
         }
 
         private string BuildStateSummary()
