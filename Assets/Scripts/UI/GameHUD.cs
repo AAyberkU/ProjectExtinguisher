@@ -16,10 +16,15 @@ namespace ProjectExtinguisher.UI
     {
         private const string StartGameButtonText = "Start Game";
         private const string ReturnToMainMenuButtonText = "Return to Main Menu";
+        private const string StartGameCreditsMarkup = "<color=#E4D8D4>Artist</color>\n<color=#E6A914>Elif Ilgin Tilev</color>\n\n<color=#E4D8D4>Designer</color>\n<color=#365CC3>Defne Gurcu</color>\n\n<color=#E4D8D4>Developer</color>\n<color=#BD2680>Ahmet Ayberk Uzun</color>\n\n<color=#E4D8D4>Music</color>\n<color=#7FB7A3>Onurhan Karabag</color>";
         private static readonly Color StartGameOverlayColor = new(0f, 0f, 0f, 0f);
         private static readonly Color StartGameButtonColor = new(0.1f, 0.14f, 0.18f, 0.96f);
         private static readonly Color StartGameLabelColor = new(0.97f, 0.97f, 0.97f, 1f);
+        private static readonly Color BorderHudTextColor = new Color32(0x37, 0x02, 0x5A, 0xFF);
         private static readonly Vector2 StartGameButtonSize = new(320f, 96f);
+        private static readonly Vector2 StartGameButtonPosition = new(0f, 210f);
+        private static readonly Vector2 StartGameCreditsPanelSize = new(520f, 430f);
+        private static readonly Vector2 StartGameCreditsPanelPosition = new(0f, -95f);
 
         // ──────────────────────────────────────────────────────────────────────────
         // Inspector fields
@@ -70,6 +75,9 @@ namespace ProjectExtinguisher.UI
         [SerializeField] [Min(0f)] private float hintVisibleDuration = 3.5f;
         [SerializeField] [Min(0f)] private float hintFadeDuration    = 0.8f;
 
+        [Header("Font Override")]
+        [SerializeField] private TMP_FontAsset fontOverride;
+
         // ──────────────────────────────────────────────────────────────────────────
         // Private state
         // ──────────────────────────────────────────────────────────────────────────
@@ -80,6 +88,7 @@ namespace ProjectExtinguisher.UI
         private CanvasGroup startGameOverlay;
         private Button startGameButton;
         private TextMeshProUGUI startGameButtonLabel;
+        private TextMeshProUGUI startGameCreditsLabel;
         private bool startGameOverlayVisible;
 
         // ──────────────────────────────────────────────────────────────────────────
@@ -221,6 +230,9 @@ namespace ProjectExtinguisher.UI
 
         private void Start()
         {
+            ApplyFontOverride();
+            ApplyBorderLabelColors();
+
             // Static / one-time labels
             if (levelLabel != null)
             {
@@ -274,23 +286,10 @@ namespace ProjectExtinguisher.UI
             }
 
             int remaining = controller.PlanningMovesRemaining;
-            int limit     = controller.PlanningMoveLimit;
 
             movesLeftLabel.text = $"Moves Left: {remaining:D2}";
 
-            float fraction = limit > 0 ? (float)remaining / limit : 1f;
-            if (fraction <= criticalThreshold)
-            {
-                movesLeftLabel.color = movesColorCritical;
-            }
-            else if (fraction <= amberThreshold)
-            {
-                movesLeftLabel.color = movesColorAmber;
-            }
-            else
-            {
-                movesLeftLabel.color = movesColorNormal;
-            }
+            movesLeftLabel.color = BorderHudTextColor;
 
             SetLabelAlpha(movesLeftLabel, startGameOverlayVisible ? 0f : 1f);
         }
@@ -548,7 +547,7 @@ namespace ProjectExtinguisher.UI
 
         private void EnsureStartGameOverlay()
         {
-            if (startGameOverlay != null && startGameButton != null && startGameButtonLabel != null)
+            if (startGameOverlay != null && startGameButton != null && startGameButtonLabel != null && startGameCreditsLabel != null)
             {
                 return;
             }
@@ -580,7 +579,7 @@ namespace ProjectExtinguisher.UI
             buttonTransform.anchorMax = new Vector2(0.5f, 0.5f);
             buttonTransform.pivot = new Vector2(0.5f, 0.5f);
             buttonTransform.sizeDelta = StartGameButtonSize;
-            buttonTransform.anchoredPosition = Vector2.zero;
+            buttonTransform.anchoredPosition = StartGameButtonPosition;
 
             Image buttonImage = buttonObject.GetComponent<Image>();
             buttonImage.color = StartGameButtonColor;
@@ -612,11 +611,49 @@ namespace ProjectExtinguisher.UI
                 startGameButtonLabel.font = fontAsset;
             }
 
+            GameObject creditsPanelObject = new GameObject("Start Game Credits Panel", typeof(RectTransform), typeof(Image));
+            RectTransform creditsPanelTransform = creditsPanelObject.GetComponent<RectTransform>();
+            creditsPanelTransform.SetParent(overlayTransform, false);
+            creditsPanelTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            creditsPanelTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            creditsPanelTransform.pivot = new Vector2(0.5f, 0.5f);
+            creditsPanelTransform.sizeDelta = StartGameCreditsPanelSize;
+            creditsPanelTransform.anchoredPosition = StartGameCreditsPanelPosition;
+
+            Image creditsPanelImage = creditsPanelObject.GetComponent<Image>();
+            creditsPanelImage.color = StartGameButtonColor;
+
+            GameObject creditsLabelObject = new GameObject("Credits Label", typeof(RectTransform), typeof(TextMeshProUGUI));
+            RectTransform creditsLabelTransform = creditsLabelObject.GetComponent<RectTransform>();
+            creditsLabelTransform.SetParent(creditsPanelTransform, false);
+            creditsLabelTransform.anchorMin = Vector2.zero;
+            creditsLabelTransform.anchorMax = Vector2.one;
+            creditsLabelTransform.offsetMin = new Vector2(26f, 22f);
+            creditsLabelTransform.offsetMax = new Vector2(-26f, -22f);
+
+            startGameCreditsLabel = creditsLabelObject.GetComponent<TextMeshProUGUI>();
+            startGameCreditsLabel.alignment = TextAlignmentOptions.Center;
+            startGameCreditsLabel.enableAutoSizing = true;
+            startGameCreditsLabel.fontSizeMin = 18f;
+            startGameCreditsLabel.fontSizeMax = 36f;
+            startGameCreditsLabel.lineSpacing = 6f;
+            startGameCreditsLabel.text = StartGameCreditsMarkup;
+
+            if (fontAsset != null)
+            {
+                startGameCreditsLabel.font = fontAsset;
+            }
+
             HideStartGameOverlay();
         }
 
         private TMP_FontAsset ResolveHudFontAsset()
         {
+            if (fontOverride != null)
+            {
+                return fontOverride;
+            }
+
             if (levelLabel != null)
             {
                 return levelLabel.font;
@@ -638,6 +675,48 @@ namespace ProjectExtinguisher.UI
             }
 
             return TMP_Settings.defaultFontAsset;
+        }
+
+        private void ApplyFontOverride()
+        {
+            if (fontOverride == null)
+            {
+                return;
+            }
+
+            ApplyFontToLabel(movesLeftLabel);
+            ApplyFontToLabel(levelLabel);
+            ApplyFontToLabel(resetHintLabel);
+            ApplyFontToLabel(outcomeHeadline);
+            ApplyFontToLabel(outcomeSubline);
+            ApplyFontToLabel(nextLevelButtonLabel);
+            ApplyFontToLabel(gameplayHintLabel);
+            ApplyFontToLabel(startGameButtonLabel);
+            ApplyFontToLabel(startGameCreditsLabel);
+        }
+
+        private void ApplyBorderLabelColors()
+        {
+            ApplyColorToLabel(movesLeftLabel);
+            ApplyColorToLabel(levelLabel);
+            ApplyColorToLabel(resetHintLabel);
+            ApplyColorToLabel(gameplayHintLabel);
+        }
+
+        private void ApplyFontToLabel(TMP_Text label)
+        {
+            if (label != null && fontOverride != null)
+            {
+                label.font = fontOverride;
+            }
+        }
+
+        private void ApplyColorToLabel(TMP_Text label)
+        {
+            if (label != null)
+            {
+                label.color = BorderHudTextColor;
+            }
         }
 
         private void Log(string message)

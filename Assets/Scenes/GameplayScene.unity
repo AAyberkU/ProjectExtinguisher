@@ -2169,6 +2169,7 @@ MonoBehaviour:
   gameplayHintText: Click a neighboring tile to move Larry
   hintVisibleDuration: 3.5
   hintFadeDuration: 0.8
+  fontOverride: {fileID: 11400000, guid: 601a1ef1e4cc743428b8482d1e0d1ad5, type: 2}
 --- !u!114 &554775370
 MonoBehaviour:
   m_ObjectHideFlags: 0
