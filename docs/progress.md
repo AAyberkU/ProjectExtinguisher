@@ -1,64 +1,74 @@
 ## Status
 
-- Project is in playable-prototype phase with a complete core loop, HUD, session-based multi-level progression, and updated production art integration.
-- Implemented: `HexCell`, `HexGridManager`, `GameState`, `TileActivationController`, `LarryController`, `GameHUD`, `LevelData`, and `LevelLoader`.
-- `GameplayScene` contains a 61-cell pointy-top hex board, Larry pawn, win/fail resolution, a live HUD, and two playable levels with in-session progression.
+- Project is in playable jam-prototype/content-polish phase.
+- `GameplayScene` is the active build scene and contains the full board, Larry, HUD, startup menu overlay, background presentation, audio wiring, level intro animation, and ordered level progression.
+- The project currently has 5 playable `LevelData` assets wired into `LevelLoader`: `Level_001` through `Level_005`.
+- Implemented gameplay systems include normal tile activation, Larry-centered adjacency, step-by-step movement, win/fail resolution, reset, blocked tiles, catapult tiles, move-bonus/health tiles, HUD, start-game gate, level intro, and audio feedback.
 
 ## Completed
 
-- Added initial hex cell representation.
-- Added initial grid manager for hex-grid setup logic.
-- Added `GameState` and `TileActivationController` for planning-phase interaction and reset.
-- Created `GameplayScene` and added it to build settings.
-- Switched placeholder visuals to real hex silhouettes.
-- Created reusable prefabs for start, goal, path, support, and blocked hex cells.
-- Expanded the scene to a full 61-cell large hex map with 5 cells per outer side.
-- Corrected the large-board spacing to avoid overlap and fit the board inside the camera view.
-- Reworked activation to be Larry-centered so only tiles adjacent to Larry can be opened.
-- Added a basic Larry pawn to `GameplayScene` with current-cell tracking and reset support.
-- Added hop-based movement polish to Larry so each step animates with a readable pawn-like bounce.
- - Added win condition when Larry reaches the goal tile.
- - Added out-of-moves fail condition when the last valid move is spent without reaching the goal.
- - Added `GameHUD` with moves counter (color shift), level label, reset hint, outcome overlay (win/lose), and fading gameplay hint.
- - Fixed HUD outcome panel not disappearing on reset.
-- Imported and named real art assets: `LarrySprite.png`, `HexTile_Start.png`, `HexTile_Goal.png`, `HexTile_Path_01..10.png` under `Assets/Art/`.
-- Replaced prefab sprites with imported art; 1 start, 1 goal, 10 path variants, 1 blocked placeholder.
-- Manually wired art into the scene; all hex tile and Larry visuals now use real art instead of placeholders.
-- Chose a single-scene level architecture: future levels will use data assets loaded into `GameplayScene` rather than separate scenes.
-- Added `LevelData` and `LevelLoader` so move limit, start, goal, per-cell overrides, and level label can be driven from a selected asset.
-- Created `Assets/Levels/Level_001.asset` as the first level data asset.
-- Updated the scene to use the artist-provided pointy-top board layout with corrected scale/rotation so the 61-cell map no longer overlaps and fits the camera.
-- Applied a small post-processing profile adjustment while tuning the current scene presentation.
-- Created `Assets/Levels/Level_002.asset` with a different start/goal placement and randomized path variants.
-- Added session-based level progression to `LevelLoader`: game starts from Level 1, a `Next Level` button appears on win, reset/fail restart the currently active level.
-- Added `Next Level` button to the HUD outcome overlay, visible only on win when a next level exists; shows a final-level replay message when no next level is available.
-- Added `EventSystem` to scene and UI guard in `TileActivationController` so gameplay clicks are blocked while pointer is over UI.
-- Updated the scene Larry visual to use the imported `LarrySprite` art directly with no runtime tint filter.
-- Simplified `HexCell` tinting so only `inactiveColor` and `highlightColor` are applied; active, start, goal, and blocked tiles now preserve their authored sprite colors.
-- Replaced the single blocked placeholder setup with `BlockedHexCell_01`, `BlockedHexCell_02`, and `BlockedHexCell_03`.
-- Updated `LevelLoader` to support authored blocked visual variants as well as path variants.
-- Redesigned `Level_002` with the new start/goal/obstacle layout and balanced blocked variant usage.
+- Added initial hex cell representation with axial coordinates.
+- Added `HexGridManager` for board registration and start/goal lookup.
+- Added `GameState` and `TileActivationController` for planning-state interaction, move limits, reset, win, and fail resolution.
+- Created `GameplayScene` and added it to Build Settings; `GameplayScene` is enabled and `SampleScene` is disabled.
+- Switched placeholder visuals to real tile silhouettes and imported production art under `Assets/Art/`.
+- Created reusable prefabs for start, goal, path, blocked, catapult, and health/move-bonus hex cells.
+- Expanded the board to a 61-cell large pointy-top map with 5 cells per outer side.
+- Corrected board spacing, scale, and camera framing so the 61-cell map fits the current camera view.
+- Reworked activation to be Larry-centered so only tiles adjacent to Larry can be opened by normal clicks.
+- Added Larry pawn visuals, current-cell tracking, reset support, jump SFX, hop animation, landing squash, and current-tile hover/shadow feedback.
+- Added immediate movement after each valid activation.
+- Added win condition when Larry reaches the goal tile.
+- Added out-of-moves fail condition when the last available move is spent without reaching the goal.
+- Added `GameHUD` with moves counter, level label, reset hint, outcome overlay, next-level/final-level action button, fading gameplay hint, and runtime start-game overlay with credits.
+- Added `EventSystem` and UI click guard so gameplay clicks are blocked while the pointer is over UI.
+- Added `LevelData` and `LevelLoader` so move limit, start, goal, per-cell state, visual variants, and level label are driven from data assets.
+- Chose a single-scene level architecture: all levels use `GameplayScene` and are configured by `LevelData` assets.
+- Added session-based level progression to `LevelLoader` through an ordered level list and `LoadNextLevel()`.
+- Created and wired `Level_001.asset` through `Level_005.asset`.
+- Added blocked tile variant support with `BlockedHexCell_01..03` and `LevelLoader.blockedVariantSprites`.
+- Added catapult tile support with `HexCell.CatapultDirection`, catapult prefab variants for all six axial directions, runtime catapult launch resolution, catapult SFX, and a configurable chain limit.
+- Added move-bonus/health tile support with one-time bonus consumption, reset restoration, health sprite support, and heal SFX.
+- Added `BackgroundPresentationController` for menu/gameplay background tint, overlay, and camera-fitted background scaling.
+- Added startup gate flow: board/Larry hidden in `PreGame`, `Start Game` overlay shown, gameplay starts after the button is clicked.
+- Added level intro drop animation with intro SFX before each applied level unlocks input.
+- Wired audio assets for background music, jump, catapult, heal, restart, lose, level complete, and intro shuffle.
+- Simplified tile tinting so authored active/start/goal/blocked/catapult/health art keeps its original color, while inactive and highlighted states still receive visual filtering.
+- Verified through Unity MCP inspection that `GameplayScene` has 61 registered cells, one `LevelLoader`, one `GameHUD`, one `EventSystem`, and no current console errors/warnings at inspection time.
 
 ## Architecture Snapshot
 
-- Current gameplay code centers on `HexCell`, `HexGridManager`, `GameState`, `TileActivationController`, `LarryController`, `GameHUD`, `LevelData`, and `LevelLoader`.
-- `GameplayScene` contains a `GridRoot`, a registered 61-cell pointy-top hex board, a Larry pawn, an active step-by-step interaction loop, and a selected level asset.
-- All scene tiles are prefab instances under `GridRoot/Cells` and are driven by `HexCell` state plus `HexGridManager` registration.
-- `LevelLoader` owns an ordered level list, tracks the current session level, and exposes `LoadNextLevel()`, `HasNextLevel`, and `CurrentLevel` for HUD-driven progression.
-- Larry is now the live reference point for interaction: each valid click activates a neighboring tile, consumes one move, and immediately moves Larry one step.
-- `TileActivationController` owns win/fail flags, locks input on outcome, and calls `GameHUD.ResetHUD()` on reset.
-- `GameHUD` reads controller state each frame and drives all 5 HUD elements: moves counter, level label, reset hint, outcome overlay, gameplay hint.
-- Art is organized under `Assets/Art/Characters/Larry/` and `Assets/Art/Tiles/Hex/`; prefab set is `StartHexCell`, `GoalHexCell`, `BlockedHexCell_01..03`, `PathHexCell_01..10`.
-- `LevelLoader` applies both path and blocked visual variants from authored `LevelData` entries.
-- Pathfinding is no longer part of the planned core loop.
+- `HexCell` owns coordinate, active/walkable/start/goal/highlight state, catapult state, move-bonus state, sprite/color handling, collider drive option, and sorting order logic.
+- `HexGridManager` auto-collects child cells, rebuilds the coordinate registry, validates duplicates, and exposes start/goal/all-cell lookups.
+- `TileActivationController` handles Input System mouse activation, keyboard reset, UI click guard, move accounting, outcome resolution, catapult chain resolution, move-bonus application, background music, and gameplay SFX.
+- `LarryController` tracks Larry's current cell, resolves the initial start cell, animates hops, plays jump SFX, resets position, and renders the current-tile hover effect.
+- `LevelData` stores level identity, move limit, start/goal coordinates, default active state, and per-cell overrides for blocked, initially active, catapult, move bonus, and visual variants.
+- `LevelLoader` applies the selected `LevelData` to the shared board, captures the visual palette, binds the HUD, manages ordered progression, controls the startup gate, and plays level intro animation.
+- `GameHUD` drives the live HUD, win/fail overlay, next-level/final-level action, fading hint, start-game overlay, and credits.
+- `BackgroundPresentationController` manages the background sprite, menu overlay, gameplay/menu tint, zoom transition, and camera fitting.
+- `GameHUDBuilder` remains as an editor utility for rebuilding the HUD in an active scene.
+- Build Settings currently include disabled `SampleScene` and enabled `GameplayScene`.
+
+## Current Level Set
+
+| Level | Moves | Start | Goal | Blocked | Catapults | Move Bonuses |
+| --- | ---: | --- | --- | ---: | ---: | ---: |
+| `Level_001` | 8 | `(-4, 0)` | `(4, 0)` | 0 | 0 | 0 |
+| `Level_002` | 9 | `(-4, 0)` | `(2, 2)` | 12 | 0 | 0 |
+| `Level_003` | 7 | `(1, 3)` | `(2, -4)` | 6 | 8 | 0 |
+| `Level_004` | 8 | `(4, -3)` | `(-4, 3)` | 6 | 4 | 4 |
+| `Level_005` | 7 | `(-1, 3)` | `(0, -4)` | 6 | 4 | 2 |
 
 ## Immediate Next Steps
 
-1. Create `Level_003` data asset to complete the initial 3-level set.
-2. Polish HUD visuals and game-feel details.
-3. Consider a level-select or menu screen once the core level set is finalized.
-4. Decide whether to add more special tile types beyond the current path/blocked set.
+1. Manually playtest Levels 1-5 end to end and rebalance move limits, catapult placements, and health tile counts where needed.
+2. Decide whether the moves counter should keep the current fixed dark-purple HUD color or restore the older normal/amber/red depletion color-shift behavior.
+3. Do a controlled art/asset cleanup pass for informal tile filenames and any remaining placeholder-looking sprites while preserving Unity meta GUID references.
+4. Tune camera/background/HUD framing for narrow aspect ratios and the final jam target resolution.
+5. Run a final build smoke test and packaging checklist once balance and presentation are locked.
 
 ## Notes
 
-- The core prototype loop is complete: tile activation, Larry movement, win/fail resolution, HUD feedback, and session-based level progression all work together.
+- The core loop is currently implemented and playable: start gate, level intro, tile activation, Larry movement, special tiles, win/fail resolution, HUD feedback, reset, and multi-level progression work together in one scene.
+- `GameState.Execution` still exists as an enum value, but the current design does not use a separate execution phase.
+- Current documentation was synced against project scripts, level assets, prefabs, scene hierarchy, Build Settings, art/audio folders, and Unity console state on 2026-04-26.

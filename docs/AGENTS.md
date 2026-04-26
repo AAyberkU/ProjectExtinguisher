@@ -1,61 +1,57 @@
-This file serves as the entry point and operational guide for any AI agent (generalist or sub-agent) joining a session. It defines the workflow, communication protocols, and links to the project's living documentation.
+This file is the entry point and operational guide for any AI agent joining the project. It defines the documentation order, project workflow, and update rules for keeping the living docs aligned with the Unity project.
 
 ## Documentation Structure
 
-All project documentation is located in the `docs/` directory. Each agent must read these in the following order:
+All project documentation is located in the `docs/` directory. Read the files in this order before changing project files or documentation:
 
-1. `AGENTS.md`: (Current File) Operational rules and sub-agent definitions.
-2. `design.md`: Game design specifications, mechanics, and architectural decisions.
-3. `progress.md`: Current status, completed tasks, and the immediate "to-do" list.
-4. `bugs.md`: Known issues, reproduction steps, and fix statuses.
+1. `AGENTS.md`: Operational rules and sub-agent expectations.
+2. `design.md`: Game design, mechanics, scene architecture, and technical decisions.
+3. `progress.md`: Current project state, completed work, immediate next steps, and session notes.
+4. `bugs.md`: Confirmed bugs, open technical risks, and fixed issues.
 
 ## Agent Roles & Workflow
 
-You may operate as the primary orchestrator or delegate tasks to specific sub-agents:
-
-- `developer`: Responsible for implementation, refactoring, and technical logic.
-- `tester`: Responsible for bug hunting, regression testing, and verifying fixes.
-- `designer`: Handles gameplay feel, UX/UI layouts, and visual/audio polish.
-- `docs-maintainer`: Ensures all `.md` files are updated after every significant change.
+- `developer`: Implements, refactors, and investigates technical logic.
+- `tester`: Reproduces bugs, verifies fixes, and reports regressions or risks.
+- `designer`: Reviews gameplay feel, UX/UI, visual direction, and audio/polish choices.
+- `docs-maintainer`: Updates `.md` files after significant implementation, design, or production-state changes.
 
 ## Standard Execution Loop
 
-1. Analysis: Read the `docs/` files to understand the current state.
-2. Implementation: Perform the task via `developer`.
-3. Handoff Pause (Critical): After development is complete, STOP. Do not hand over to the tester yet. Ask the user to perform a manual test.
-4. User Verification: Wait for the user to provide feedback or say continue/proceed.
-5. Quality Assurance: If the user proceeds, hand over to `tester` for a formal pass.
-6. Documentation: Update the relevant files via `docs-maintainer`.
-7. Finalization (Git Push): Once the docs are updated and no blocking issues remain, push the changes to Git. This is the final step of any feature or bug fix.
+1. Analysis: Read the `docs/` files and inspect the relevant Unity assets, scenes, scripts, and settings before making changes.
+2. Implementation: Make the smallest correct project change when the user asks for code, scene, asset, or design work.
+3. Manual Handoff: For gameplay-affecting changes, stop after implementation and let the user manually test before broad QA or follow-up polish.
+4. Quality Assurance: When requested or appropriate, run targeted checks, Unity tests, console checks, and/or a tester pass.
+5. Documentation: Update `docs/design.md`, `docs/progress.md`, and `docs/bugs.md` to reflect the actual state of the project.
+6. Finalization: Commit or push only when the user explicitly requests it. Do not push automatically after documentation-only or implementation work.
+
+Documentation-only sync tasks skip implementation and manual gameplay handoff unless the sync uncovers a blocking bug that requires a separate fix.
 
 ## Working Rules
 
-- Small Steps: Progress in incremental, functional steps rather than massive architectural shifts.
-- User-Centric: When in doubt, or if a decision conflicts with existing manual scene setups, ask the user.
-- Inspector-Driven: Prefer Unity Inspector-friendly solutions (serialized fields, prefabs) over hardcoded references.
-- Tunable Scripts: Expose gameplay-feel and mechanic-related values in the Inspector so they can be adjusted quickly without code edits.
-- Debug Logging: Add practical debug logs to scripts by default, and provide an Inspector toggle on each script to enable or disable logging.
-- Operational Memory: Every session must begin by summarizing the status found in `progress.md`.
-- Commit Messages: Use concise English commit titles and bodies that explain the related change.
+- Small Steps: Prefer incremental, functional changes over large rewrites.
+- User-Centric: Ask only when a decision is ambiguous or conflicts with a manual Unity scene setup.
+- Inspector-Driven: Prefer serialized fields, prefabs, and scene references over hardcoded lookups for tunable gameplay data.
+- Tunable Scripts: Expose gameplay-feel values in the Inspector so jam iteration does not require code edits.
+- Debug Logging: Gameplay scripts should keep practical debug logs behind an Inspector toggle.
+- Operational Memory: New sessions should summarize the current status from `docs/progress.md` before doing substantial work.
+- Commit Messages: When commits are requested, use concise English commit messages that explain the change and reason.
 
-## Update Protocols (The Rules of Update)
-
-To prevent documentation rot, follow these strict rules whenever a change is made. After updating, always proceed to Git Push.
+## Update Protocols
 
 | Trigger | Action |
 | --- | --- |
-| New Decision Made | Update `docs/progress.md` and `docs/design.md`. |
-| New System / Architecture Change | Update `docs/design.md`. |
-| Bug Identified | Log it immediately in `docs/bugs.md`. |
-| Operational Progress Only | Update `docs/progress.md`. |
-| Bug Resolved | Move entry to "Fixed" section in `docs/bugs.md`. |
+| New design decision | Update `docs/design.md` and `docs/progress.md`. |
+| New system or architecture change | Update `docs/design.md` and `docs/progress.md`. |
+| Operational progress only | Update `docs/progress.md`. |
+| Bug identified | Log it in `docs/bugs.md`. |
+| Bug resolved | Move or summarize it under `docs/bugs.md` fixed items. |
+| Documentation sync | Cross-check docs against project reality and update every affected doc. |
 
 ## Session Start Checklist
 
-Every time a new session starts, the agent must:
-
-1. Read `docs/AGENTS.md` for rules.
-2. Check `docs/progress.md` for the last known state.
-3. Cross-reference `docs/design.md` for technical constraints.
-4. Check `docs/bugs.md` for any blockers that need immediate attention.
-5. Confirm the current task with the user before writing any code.
+1. Read `docs/AGENTS.md`.
+2. Read `docs/progress.md` for the last known state.
+3. Cross-reference `docs/design.md` for gameplay and architecture constraints.
+4. Check `docs/bugs.md` for blockers and technical risks.
+5. Inspect the relevant Unity project files before editing; confirm with the user only if the requested task is unclear.
