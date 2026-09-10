@@ -16,7 +16,7 @@
 
 A key highlight of this project is its development process. **Project Extinguisher** was built leveraging an **Agentic AI Workflow**. 
 
-Instead of traditional ad-hoc prompting, the project maintains a strict, self-documenting architecture within the `docs/` folder (which includes `AGENTS.md`, `design.md`, `progress.md`, and `bugs.md`). These markdown files serve as the explicit memory and structural source of truth for AI coding assistants. 
+Instead of traditional ad-hoc prompting, the project maintains repository-wide agent guidance in `AGENTS.md` and living documentation in the `docs/` folder (`design.md`, `progress.md`, and `bugs.md`). These markdown files serve as the explicit memory and structural source of truth for AI coding assistants.
 
 By keeping a continuous, updated documentation loop:
 - **Context is Preserved:** The AI consistently understands the single-scene architecture and data structures without needing to blindly scan the entire codebase.

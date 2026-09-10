@@ -2,12 +2,12 @@ This file is the entry point and operational guide for any AI agent joining the 
 
 ## Documentation Structure
 
-All project documentation is located in the `docs/` directory. Read the files in this order before changing project files or documentation:
+Project documentation is stored in the `docs/` directory, with this repository-wide guide at the project root. Read the files in this order before changing project files or documentation:
 
 1. `AGENTS.md`: Operational rules and sub-agent expectations.
-2. `design.md`: Game design, mechanics, scene architecture, and technical decisions.
-3. `progress.md`: Current project state, completed work, immediate next steps, and session notes.
-4. `bugs.md`: Confirmed bugs, open technical risks, and fixed issues.
+2. `docs/design.md`: Game design, mechanics, scene architecture, and technical decisions.
+3. `docs/progress.md`: Current project state, completed work, immediate next steps, and session notes.
+4. `docs/bugs.md`: Confirmed bugs, open technical risks, and fixed issues.
 
 ## Agent Roles & Workflow
 
@@ -50,7 +50,7 @@ Documentation-only sync tasks skip implementation and manual gameplay handoff un
 
 ## Session Start Checklist
 
-1. Read `docs/AGENTS.md`.
+1. Read `AGENTS.md`.
 2. Read `docs/progress.md` for the last known state.
 3. Cross-reference `docs/design.md` for gameplay and architecture constraints.
 4. Check `docs/bugs.md` for blockers and technical risks.
